@@ -10,7 +10,7 @@ class Word_Graph:
         self.tuple2node_id = {}
         self.node_id2tuple = {}
         self.node_id_counter = 0
-        self.edge2weight = {} # used for keeping track of edge weights as they're updated #TODO: This can be removed
+        self.edge2weight = {} # used for keeping track of edge weights as they're updated
 
         self.word_graph = digraph()
         self.build_graph(tokens, n_size)
@@ -37,11 +37,11 @@ class Word_Graph:
                 next_state_id = self.tuple2node_id[next_state]
 
                 # Increment the edge weight by 1 every time the states (token-tuples) are found adjacent to each other 
-                # TODO: refactor edge2weight out
                 edge_weight = 1
                 if (cur_state_id, next_state_id) in self.edge2weight:
                     edge_weight += self.edge2weight[(cur_state_id, next_state_id)]
                 self.edge2weight[(cur_state_id, next_state_id)] = edge_weight
+
 
                 if not self.word_graph.has_node(cur_state_id):
                     self.word_graph.add_node(cur_state_id)
@@ -52,7 +52,7 @@ class Word_Graph:
                 # If the edge already exists, delete it and add the new edge with incremented weight
                 if self.word_graph.has_edge((cur_state_id, next_state_id)):
                     self.word_graph.del_edge((cur_state_id, next_state_id))
-                self.word_graph.add_edge((cur_state_id, next_state_id), wt=edge_weight)
+                self.word_graph.add_edge((cur_state_id, next_state_id), wt=1/edge_weight)
 
     # Returns the shortest path (in an array of tuples) from tupA to tupB
     def shortest_path(self, tupA, tupB):
