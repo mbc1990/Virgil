@@ -8,9 +8,7 @@ from nltk.corpus import wordnet
 from nltk.tokenize import word_tokenize, sent_tokenize
 import fuzzy # phonetic representation 
 import Levenshtein as pylev
-import bisect
 import os.path
-import sys
 import json
 import operator
 import math
@@ -23,6 +21,7 @@ def generate_outline():
     #return ['winter', 'owl', 'snow', 'sadness']
     #return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
     return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
+    #return ['sleep', 'warm', 'dream', 'tire', 'drift']
 
 tmap = {}
 token2ngrams = {}
@@ -131,7 +130,7 @@ def poem_fitness(poem):
 
     # High alliterative value per depth is rewarded 
     score = score/parse_height 
-    print "score: "+str(score)
+    #print "score: "+str(score)
     return score
 
 # Randomly decided whether or not to mutate
@@ -165,7 +164,33 @@ def print_human_text(poem):
         outpt += '\n'
     print outpt
 
+# Load parse height cache
+def load_parse_height_cache():
+    global height_memo
+    if os.path.isfile('parse_height_cache.json'):
+        with open('parse_height_cache.json', 'r') as fp:
+            height_cache_saved = json.load(fp)
+            for key in height_cache_saved['key_map'].keys():
+                tup_key = tuple(height_cache_saved['key_map'][key])
+                height_value = height_cache_saved['saved_cache'][key]
+                height_memo[tup_key] = height_value
+
+# Save the updated height cache
+def dump_parse_height_cache():
+    with open('parse_height_cache.json', 'w') as fp:
+        key_map_counter = 0
+        key_map = {}
+        saved_cache = {}
+        for key in height_memo.keys():
+            key_map[key_map_counter] = key 
+            saved_cache[key_map_counter] = height_memo[key]
+            key_map_counter += 1
+        output = {'key_map': key_map, 'saved_cache': saved_cache}
+        json.dump(output, fp)
+
 def main():
+    load_parse_height_cache()
+
     # initialize corpus
     tokens = get_tokens()
 
@@ -181,7 +206,7 @@ def main():
     cur_poem = []
     candidates = []
     poem_length = 6 # Number of lines in a poem
-    for i in range(0,1000):
+    for i in range(0,10000):
         outline_word = choice(outline)
         candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
         if len(cur_poem) < poem_length:
@@ -193,19 +218,19 @@ def main():
         
     print str(time.time() - start_time)+" seconds"
 
-    generations = 2
+    generations = 5 
     breeding_fraction = .25 # Top fraction of candidates allowed to breed
     mutation_prob = .1 # Probability that a child will be mutated
-    while generations > 0:
-        print "Generations remaining: "+str(generations)
-        print "Saved lines: "+str(len(height_memo))
+    generation_counter = 1
+    while generation_counter <= generations:
+        #print "Saved lines: "+str(len(height_memo))
         # Get a fitness score for each poem 
         scored_candidates = []
         counter = 0
         for candidate in candidates:
             fitness = poem_fitness(candidate)
             counter += 1
-            print str(counter)+'/'+str(len(candidates))+' candidates scored'
+            print str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(generations)+' with '+str(len(height_memo))+' cached line parse heights'
             scored_candidates.append((candidate, fitness))
             
         # Sort poems by fitness 
@@ -252,10 +277,11 @@ def main():
     candidates = scored_candidates[:5]
     candidates.reverse()
 
-    #print top 5 members of final generation 
+    # Print top 5 members of final generation 
     for candidate in candidates:
         print "Score: "+str(candidate[1])+'\n-----'
         print_human_text(candidate[0])
+
 
         
 if __name__ == "__main__":
