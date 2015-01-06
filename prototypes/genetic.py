@@ -13,10 +13,14 @@ import os.path
 import sys
 import json
 import operator
+import math
+from random import shuffle
 
 # Generates an outline, against which the candidate poems are measured 
 def generate_outline():
-    return ['winter', 'owl', 'snow', 'sadness']
+    #return ['winter', 'owl', 'snow', 'sadness']
+    #return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
+    return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
 
 tmap = {}
 token2ngrams = {}
@@ -59,7 +63,6 @@ def get_tokens():
 
 # Generates a candidate 
 def generate_candidate_line(keyword, n, min_length, max_length):
-    print "Getting starter tokens"
     rand = randint(0, len(token2ngrams[keyword])-1)
     starter_ngram = token2ngrams[keyword][rand]
     line_length = randint(min_length, max_length)
@@ -74,16 +77,68 @@ def generate_candidate_line(keyword, n, min_length, max_length):
         line.append(nextToken)
     return line
 
-# Fitness function for an individual poem 
+# Fitness function for an individual poem, the higher the return value the more fit an individual is 
 def poem_fitness(poem):
     # Sum of parse depth for each line
     # Sum of parse depth for each pair of lines
     # Parse depth overall? Probably too slow 
-    # Alliteration factor
     # Phonetic/levenshtein factor for positionally aligned (beginning, end) members of line 
     # Something involving wordnet? Comparison to outline? 
-    return 1
+    
+    # Alliteration factor - poems where more of the words start with the same two letters are considered more fit
+    total_words = 0.0
+    letters = {}
+    for line in poem:
+        for word in line:
+            total_words += 1
+            first_letter = word[0].lower()
+            if first_letter not in letters:
+                letters[first_letter] = 0
+            letters[first_letter] += 1
 
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    letter_freqs = []
+    for letter in alphabet:
+        if letter in letters:
+            letter_freqs.append((letter,letters[letter]))
+    letter_freqs.sort(key=operator.itemgetter(1))
+    letter_freqs.reverse()
+    score = (letter_freqs[0][1] + letter_freqs[1][1]) / total_words
+    if score > .75:
+        return .25 
+    return score
+    #return (letter_freqs[0][1] + letter_freqs[1][1]) / total_words
+
+# Randomly decided whether or not to mutate
+def mutate(poem, probability):
+    rand = random.uniform(0,1)
+    if rand <= probability:
+        shuffle(poem) # Naive mutation, rearrange all the words in the line
+    return poem
+        
+# 1 point crossover between two poems
+def crossover(p1, p2):
+    
+    # Maximum crossover location (shortest of the two poems)
+    max_point = len(p1)
+    if max_point > len(p2):
+        max_point = len(p2)
+
+    crossover_point = randint(0, max_point)
+    
+    child1 = p1[:crossover_point]+p2[crossover_point:]
+    child2 = p2[:crossover_point]+p1[crossover_point:]
+    return (child1, child2)
+
+def print_human_text(poem):
+    outpt = "\n"
+    for line in poem: 
+        for t in line:
+            if len(outpt) != 0 and t not in [',', '.', '!', '\n', ';','\'']:
+                outpt += " "
+            outpt += t
+        outpt += '\n'
+    print outpt
 
 def main():
     # initialize corpus
@@ -100,8 +155,8 @@ def main():
     start_time = time.time()
     cur_poem = []
     candidates = []
-    poem_length = 8 # Number of lines in a poem
-    for i in range(0,50):
+    poem_length = 6 # Number of lines in a poem
+    for i in range(0,10000):
         outline_word = choice(outline)
         candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
         if len(cur_poem) < poem_length:
@@ -112,12 +167,12 @@ def main():
     print str(len(candidates))+" candidate poems"
         
     print str(time.time() - start_time)+" seconds"
-    for c in candidates:
-        print c
-        print ""
 
     generations = 10
+    breeding_fraction = .25 # Top fraction of candidates allowed to breed
+    mutation_prob = .1 # Probability that a child will be mutated
     while generations > 0:
+        print "Generations remaining: "+str(generations)
         # Get a fitness score for each poem 
         scored_candidates = []
         for candidate in candidates:
@@ -126,17 +181,54 @@ def main():
             
         # Sort poems by fitness 
         scored_candidates.sort(key=operator.itemgetter(1))
-
+        scored_candidates.reverse()
 
         # Select the top 1/n for some n for breeding
-        # Separate the selected parents into pairs, and with some probability do 1 or 2 point crossover 
-        # For each child, with some probability, do a mutation 
-        # Repeat 
-        
+        parents = scored_candidates[0: int(math.ceil(len(scored_candidates) * breeding_fraction))]
+
+        # Remove scores
+        parents = [p[0] for p in parents] 
+
+        # Shuffle parents
+        shuffle(parents)
+
+        # Separate the selected parents into pairs
+        parent_pairs = []
+        for i in range(0, len(parents)):
+            if i+1 < len(parents):
+                parent_pairs.append((parents[i], parents[i+1]))
+                i += 1
+
+        # Each parent pair should replace their proportion of the truncated population
+        children = []
+        num_replacements = math.ceil(1/breeding_fraction)
+        for parent in parent_pairs:
+            for k in range(0,int(num_replacements/2)):
+                crossovers = crossover(parent[0], parent[1])
+                children.append(mutate(crossovers[0], mutation_prob))
+                children.append(mutate(crossovers[1], mutation_prob))
+
+        # Repeat on the next generation 
+        candidates = children
         generations -= 1
+
+    scored_candidates = []
+    for candidate in candidates:
+        fitness = poem_fitness(candidate)
+        scored_candidates.append((candidate, fitness))
         
+    # Sort poems by fitness 
+    scored_candidates.sort(key=operator.itemgetter(1))
+    scored_candidates.reverse()
+    candidates = scored_candidates[:5]
+    candidates.reverse()
 
+    #print top 5 members of final generation 
+    for candidate in candidates:
+        print "Score: "+str(candidate[1])+'\n-----'
+        print_human_text(candidate[0])
 
+        
 if __name__ == "__main__":
     main()
 
