@@ -15,6 +15,8 @@ import json
 import operator
 import math
 from random import shuffle
+from stat_parser import Parser
+parser = Parser()
 
 # Generates an outline, against which the candidate poems are measured 
 def generate_outline():
@@ -78,8 +80,9 @@ def generate_candidate_line(keyword, n, min_length, max_length):
     return line
 
 # Fitness function for an individual poem, the higher the return value the more fit an individual is 
+height_memo = {} # tuple -> parse depth
 def poem_fitness(poem):
-    # Sum of parse depth for each line
+    global height_memo
     # Sum of parse depth for each pair of lines
     # Parse depth overall? Probably too slow 
     # Phonetic/levenshtein factor for positionally aligned (beginning, end) members of line 
@@ -88,7 +91,25 @@ def poem_fitness(poem):
     # Alliteration factor - poems where more of the words start with the same two letters are considered more fit
     total_words = 0.0
     letters = {}
+
+    # Sum of parse depth for each line
+    total_parse_height = 0.1
     for line in poem:
+        parse_height = 0
+        if tuple(line) in height_memo:
+            parse_height = height_memo[tuple(line)]
+            height_memo[tuple(line)] = parse_height
+        else:
+            try:
+                parse_tree = parser.parse(' '.join(line))
+                parse_height = parse_tree.height()
+                height_memo[tuple(line)] = parse_height
+            except:
+                height_memo[tuple(line)] = 0.1
+                return 0.1 # Return 0 if there's an error parsing a poem line
+        total_parse_height += parse_height
+        
+        # Populate letter counts for alliteration metric 
         for word in line:
             total_words += 1
             first_letter = word[0].lower()
@@ -96,6 +117,7 @@ def poem_fitness(poem):
                 letters[first_letter] = 0
             letters[first_letter] += 1
 
+    # Calculate alliteration value 
     alphabet = 'abcdefghijklmnopqrstuvwxyz'
     letter_freqs = []
     for letter in alphabet:
@@ -103,11 +125,14 @@ def poem_fitness(poem):
             letter_freqs.append((letter,letters[letter]))
     letter_freqs.sort(key=operator.itemgetter(1))
     letter_freqs.reverse()
+
+    # Just letter frequencies 
     score = (letter_freqs[0][1] + letter_freqs[1][1]) / total_words
-    if score > .75:
-        return .25 
+
+    # High alliterative value per depth is rewarded 
+    score = score/parse_height 
+    print "score: "+str(score)
     return score
-    #return (letter_freqs[0][1] + letter_freqs[1][1]) / total_words
 
 # Randomly decided whether or not to mutate
 def mutate(poem, probability):
@@ -156,7 +181,7 @@ def main():
     cur_poem = []
     candidates = []
     poem_length = 6 # Number of lines in a poem
-    for i in range(0,10000):
+    for i in range(0,1000):
         outline_word = choice(outline)
         candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
         if len(cur_poem) < poem_length:
@@ -168,15 +193,19 @@ def main():
         
     print str(time.time() - start_time)+" seconds"
 
-    generations = 10
+    generations = 2
     breeding_fraction = .25 # Top fraction of candidates allowed to breed
     mutation_prob = .1 # Probability that a child will be mutated
     while generations > 0:
         print "Generations remaining: "+str(generations)
+        print "Saved lines: "+str(len(height_memo))
         # Get a fitness score for each poem 
         scored_candidates = []
+        counter = 0
         for candidate in candidates:
             fitness = poem_fitness(candidate)
+            counter += 1
+            print str(counter)+'/'+str(len(candidates))+' candidates scored'
             scored_candidates.append((candidate, fitness))
             
         # Sort poems by fitness 
