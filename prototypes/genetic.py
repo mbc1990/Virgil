@@ -84,7 +84,7 @@ def poem_fitness(poem):
     global height_memo
     # Sum of parse depth for each pair of lines
     # Parse depth overall? Probably too slow 
-    # Phonetic/levenshtein factor for positionally aligned (beginning, end) members of line 
+    # Phonetic/levenshtein factor for positionally aligned (beginning, end) members of line  #TODO: This Next
     # Something involving wordnet? Comparison to outline? 
     
     # Alliteration factor - poems where more of the words start with the same two letters are considered more fit
