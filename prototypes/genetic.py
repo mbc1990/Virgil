@@ -19,8 +19,8 @@ parser = Parser()
 # Generates an outline, against which the candidate poems are measured 
 def generate_outline():
     #return ['winter', 'owl', 'snow', 'sadness']
-    #return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
-    return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
+    return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
+    #return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
     #return ['sleep', 'warm', 'dream', 'tire', 'drift']
 
 tmap = {}
@@ -79,21 +79,27 @@ def generate_candidate_line(keyword, n, min_length, max_length):
     return line
 
 # Fitness function for an individual poem, the higher the return value the more fit an individual is 
-height_memo = {} # tuple -> parse depth
+height_memo = {} # tuple -> parse height  
+# TODO: Refactor this into functions for each value and only combine them in this function
 def poem_fitness(poem):
     global height_memo
-    # Sum of parse depth for each pair of lines
-    # Parse depth overall? Probably too slow 
-    # Phonetic/levenshtein factor for positionally aligned (beginning, end) members of line  #TODO: This Next
+    # Sum of parse height for each pair of lines
+    # Parse height overall? Probably too slow 
+
     # Something involving wordnet? Comparison to outline? 
     
     # Alliteration factor - poems where more of the words start with the same two letters are considered more fit
     total_words = 0.0
     letters = {}
 
-    # Sum of parse depth for each line
+    # Sum of parse height for each line
     total_parse_height = 0.1
+
+    # Phonetic representation of each line
+    phonetic_lines = []
+
     for line in poem:
+        # Parse height
         parse_height = 0
         if tuple(line) in height_memo:
             parse_height = height_memo[tuple(line)]
@@ -108,13 +114,44 @@ def poem_fitness(poem):
                 return 0.1 # Return 0 if there's an error parsing a poem line
         total_parse_height += parse_height
         
-        # Populate letter counts for alliteration metric 
+        phon_line = []
         for word in line:
+            # Phonetic lines
+            phon_line.append(fuzzy.nysiis(word))
+            # Populate letter counts for alliteration metric 
             total_words += 1
             first_letter = word[0].lower()
             if first_letter not in letters:
                 letters[first_letter] = 0
             letters[first_letter] += 1
+
+        # whole poem phonetic lines
+        phonetic_lines.append(phon_line)
+        
+
+    # Calculate phonetic value
+    #print 'Phonetic: '+str(phonetic_lines)
+    #print 'Poem: '+str(poem)
+    #print ''
+    phon_value = 0.1
+    for i in range(0, len(phonetic_lines)-1):
+        last_word = str(phonetic_lines[i][-1])
+        next_last_word = str(phonetic_lines[i+1][-1])
+
+        # Throw out identical sounding words (TODO: Check their original words, not phonetic representations)
+        if last_word != next_last_word and len(last_word) > 0 and len(next_last_word) > 0:
+            lev_dist = pylev.distance(last_word, next_last_word)
+
+            # Divide distance by word length since eg morning - mourning is a way better similarity than hat - had 
+            lev_dist = lev_dist/float((len(last_word) + len(next_last_word)))
+            phon_value += lev_dist
+            #print 'Potential rhyme pair: '+last_word +' '+next_last_word+' with dist: '+str(lev_dist)
+        else:
+            phon_value += 1 # very unsimilar for two words that are too short
+
+    # Normalize by poem length (in case variable length poems are allowed)
+    phon_value /= len(phonetic_lines)
+        
 
     # Calculate alliteration value 
     alphabet = 'abcdefghijklmnopqrstuvwxyz'
@@ -128,12 +165,19 @@ def poem_fitness(poem):
     # Just letter frequencies 
     score = (letter_freqs[0][1] + letter_freqs[1][1]) / total_words
 
-    # High alliterative value per depth is rewarded 
-    score = score/parse_height 
-    #print "score: "+str(score)
+    # High alliterative value and phon value per height is rewarded 
+    print 'phon value: '+str(phon_value)
+    print 'parse height: '+str(total_parse_height)
+    score = score/(total_parse_height * phon_value)
+    print 'score: '+str(score)
+
+    # Lower phonetic similarity of ending tokens on adjacent lines is rewarded
+    #score = score/phon_value
+
     return score
 
 # Randomly decided whether or not to mutate
+# TODO: Come up with better mutation function
 def mutate(poem, probability):
     rand = random.uniform(0,1)
     if rand <= probability:
@@ -206,8 +250,8 @@ def main():
     start_time = time.time()
     cur_poem = []
     candidates = []
-    poem_length = 6 # Number of lines in a poem
-    for i in range(0,1000):
+    poem_length = 5 # Number of lines in a poem
+    for i in range(0,100):
         outline_word = choice(outline)
         candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
         if len(cur_poem) < poem_length:
@@ -219,9 +263,9 @@ def main():
         
     print str(time.time() - start_time)+" seconds"
 
-    generations = 4
-    breeding_fraction = .25 # Top fraction of candidates allowed to breed
-    mutation_prob = .15 # Probability that a child will be mutated
+    generations = 5 
+    breeding_fraction = .3 # Top fraction of candidates allowed to breed
+    mutation_prob = .04 # Probability that a child will be mutated
     generation_counter = 1
     while generation_counter <= generations:
         #print "Saved lines: "+str(len(height_memo))
@@ -265,7 +309,7 @@ def main():
 
         # Repeat on the next generation 
         candidates = children
-        generations -= 1
+        generation_counter += 1
 
     scored_candidates = []
     for candidate in candidates:
