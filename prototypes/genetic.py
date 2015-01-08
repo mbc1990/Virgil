@@ -166,13 +166,11 @@ def poem_fitness(poem):
     score = (letter_freqs[0][1] + letter_freqs[1][1]) / total_words
 
     # High alliterative value and phon value per height is rewarded 
+    print 'alliteration value: '+str(score)
     print 'phon value: '+str(phon_value)
     print 'parse height: '+str(total_parse_height)
-    score = score/(total_parse_height * phon_value)
     print 'score: '+str(score)
-
-    # Lower phonetic similarity of ending tokens on adjacent lines is rewarded
-    #score = score/phon_value
+    score = score*10*phon_value/total_parse_height # Score * 10 because it's so much smaller than most phon values 
 
     return score
 
@@ -250,7 +248,7 @@ def main():
     start_time = time.time()
     cur_poem = []
     candidates = []
-    poem_length = 5 # Number of lines in a poem
+    poem_length = 6 # Number of lines in a poem
     for i in range(0,100):
         outline_word = choice(outline)
         candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
@@ -263,7 +261,7 @@ def main():
         
     print str(time.time() - start_time)+" seconds"
 
-    generations = 5 
+    generations = 10 
     breeding_fraction = .3 # Top fraction of candidates allowed to breed
     mutation_prob = .04 # Probability that a child will be mutated
     generation_counter = 1
@@ -321,6 +319,9 @@ def main():
     scored_candidates.reverse()
     candidates = scored_candidates[:5]
     candidates.reverse()
+
+    # Save parse height cache
+    dump_parse_height_cache()
 
     # Print top 5 members of final generation 
     for candidate in candidates:
