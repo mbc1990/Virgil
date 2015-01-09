@@ -175,12 +175,18 @@ def poem_fitness(poem):
     return score
 
 # Randomly decided whether or not to mutate
-# TODO: Come up with better mutation function
 def mutate(poem, probability):
     rand = random.uniform(0,1)
+
+    # randomly switch two adjacent words 
     if rand <= probability:
         line_index = random.randint(0,len(poem)-1)
-        shuffle(poem[line_index]) # Naive mutation, rearrange all the words in one line
+        word_index = random.randint(0,len(poem[line_index])-2)
+        line = poem[line_index]
+        first_part = line[:word_index]
+        switch = [line[word_index+1]] + [line[word_index]]
+        second_part = line[word_index+2:]
+        poem[line_index] = first_part + switch + second_part
     return poem
         
 # 1 point crossover between two poems
@@ -249,7 +255,7 @@ def main():
     cur_poem = []
     candidates = []
     poem_length = 6 # Number of lines in a poem
-    for i in range(0,100):
+    for i in range(0,10000):
         outline_word = choice(outline)
         candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
         if len(cur_poem) < poem_length:
@@ -258,12 +264,10 @@ def main():
             candidates.append(cur_poem)
             cur_poem = []
     print str(len(candidates))+" candidate poems"
-        
     print str(time.time() - start_time)+" seconds"
-
-    generations = 10 
+    generations = 5
     breeding_fraction = .3 # Top fraction of candidates allowed to breed
-    mutation_prob = .04 # Probability that a child will be mutated
+    mutation_prob = .05 # Probability that a child will be mutated
     generation_counter = 1
     while generation_counter <= generations:
         #print "Saved lines: "+str(len(height_memo))
