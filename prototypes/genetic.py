@@ -19,9 +19,10 @@ parser = Parser()
 # Generates an outline, against which the candidate poems are measured 
 def generate_outline():
     #return ['winter', 'owl', 'snow', 'sadness']
-    return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
+    #return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
     #return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
     #return ['sleep', 'warm', 'dream', 'tire', 'drift']
+    return ['stars', 'night', 'quiet', 'clear']
 
 tmap = {}
 token2ngrams = {}
@@ -78,26 +79,38 @@ def generate_candidate_line(keyword, n, min_length, max_length):
         line.append(nextToken)
     return line
 
-# Fitness function for an individual poem, the higher the return value the more fit an individual is 
-height_memo = {} # tuple -> parse height  
-# TODO: Refactor this into functions for each value and only combine them in this function
-def poem_fitness(poem):
-    global height_memo
-    # Sum of parse height for each pair of lines
-    # Parse height overall? Probably too slow 
 
-    # Something involving wordnet? Comparison to outline? 
-    
+height_memo = {} # tuple -> parse height  
+def alliteration(poem):
     # Alliteration factor - poems where more of the words start with the same two letters are considered more fit
     total_words = 0.0
     letters = {}
+    for line in poem:
+        for word in line:
+            # Populate letter counts for alliteration metric 
+            total_words += 1
+            first_letter = word[0].lower()
+            if first_letter not in letters:
+                letters[first_letter] = 0
+            letters[first_letter] += 1
 
+    # Calculate alliteration value 
+    letter_freqs = []
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    for letter in alphabet:
+        if letter in letters:
+            letter_freqs.append((letter,letters[letter]))
+    letter_freqs.sort(key=operator.itemgetter(1))
+    letter_freqs.reverse()
+    
+    # sum of two most frequent letters divided by total number of words
+    return (letter_freqs[0][1]+letter_freqs[1][1])/total_words
+
+# Sum of parse height of each line
+def parse_heightBAD(poem):
+    global height_memo
     # Sum of parse height for each line
     total_parse_height = 0.1
-
-    # Phonetic representation of each line
-    phonetic_lines = []
-
     for line in poem:
         # Parse height
         parse_height = 0
@@ -113,26 +126,21 @@ def poem_fitness(poem):
                 height_memo[tuple(line)] = 0.1
                 return 0.1 # Return 0 if there's an error parsing a poem line
         total_parse_height += parse_height
-        
+
+        return total_parse_height
+
+
+
+def phonetic_similarity(poem):
+    # Phonetic representation of each line
+    phonetic_lines = []
+    for line in poem:
         phon_line = []
         for word in line:
-            # Phonetic lines
             phon_line.append(fuzzy.nysiis(word))
-            # Populate letter counts for alliteration metric 
-            total_words += 1
-            first_letter = word[0].lower()
-            if first_letter not in letters:
-                letters[first_letter] = 0
-            letters[first_letter] += 1
-
-        # whole poem phonetic lines
         phonetic_lines.append(phon_line)
-        
 
     # Calculate phonetic value
-    #print 'Phonetic: '+str(phonetic_lines)
-    #print 'Poem: '+str(poem)
-    #print ''
     phon_value = 0.1
     for i in range(0, len(phonetic_lines)-1):
         last_word = str(phonetic_lines[i][-1])
@@ -151,27 +159,37 @@ def poem_fitness(poem):
 
     # Normalize by poem length (in case variable length poems are allowed)
     phon_value /= len(phonetic_lines)
-        
+    return phon_value
 
-    # Calculate alliteration value 
-    alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    letter_freqs = []
-    for letter in alphabet:
-        if letter in letters:
-            letter_freqs.append((letter,letters[letter]))
-    letter_freqs.sort(key=operator.itemgetter(1))
-    letter_freqs.reverse()
 
-    # Just letter frequencies 
-    score = (letter_freqs[0][1] + letter_freqs[1][1]) / total_words
+# Fitness function for an individual poem, the higher the return value the more fit an individual is 
+def poem_fitness(poem):
+    global min_alliteration 
+    global max_alliteration
+    global min_phon 
+    global max_phon 
+    
+    alliteration_score = alliteration(poem)
+    parse_height_score = parse_heightBAD(poem)
+    phonetic_similarity_score = phonetic_similarity(poem)
 
-    # High alliterative value and phon value per height is rewarded 
-    print 'alliteration value: '+str(score)
-    print 'phon value: '+str(phon_value)
-    print 'parse height: '+str(total_parse_height)
-    print 'score: '+str(score)
-    score = score*10*phon_value/total_parse_height # Score * 10 because it's so much smaller than most phon values 
+    if alliteration_score > max_alliteration:
+        max_alliteration = alliteration_score 
 
+    if alliteration_score < min_alliteration:
+        min_alliteration = alliteration_score 
+
+    if phonetic_similarity_score > max_phon:
+        max_phon = phonetic_similarity_score
+
+    if phonetic_similarity_score < min_phon:
+        min_phon = phonetic_similarity_score
+
+    print 'Alliteration: '+str(alliteration_score)
+    print 'Parse height: '+str(parse_height_score)
+    print 'Phon similar: '+str(phonetic_similarity_score)
+
+    score = alliteration_score*10*phonetic_similarity_score/parse_height_score
     return score
 
 # Randomly decided whether or not to mutate
@@ -237,6 +255,10 @@ def dump_parse_height_cache():
         output = {'key_map': key_map, 'saved_cache': saved_cache}
         json.dump(output, fp)
 
+min_phon = 1
+max_phon = 0
+min_alliteration = 1
+max_alliteration = 0
 def main():
     load_parse_height_cache()
 
@@ -270,7 +292,6 @@ def main():
     mutation_prob = .05 # Probability that a child will be mutated
     generation_counter = 1
     while generation_counter <= generations:
-        #print "Saved lines: "+str(len(height_memo))
         # Get a fitness score for each poem 
         scored_candidates = []
         counter = 0
@@ -332,7 +353,10 @@ def main():
         print "Score: "+str(candidate[1])+'\n-----'
         print_human_text(candidate[0])
 
-
+    print 'min phon: '+str(min_phon)
+    print 'max phon: '+str(max_phon)
+    print 'min allit: '+str(min_alliteration)
+    print 'max allit: '+str(max_alliteration)
         
 if __name__ == "__main__":
     main()
