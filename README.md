@@ -1,4 +1,4 @@
 Virgil
 ======
 
-Probabilistic poetry generator 
+Poetry written by a genetic algorithm
