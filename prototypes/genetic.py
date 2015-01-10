@@ -3,10 +3,9 @@ import time
 from random import randint
 from random import choice
 import random
-import nltk
 from nltk.corpus import wordnet
 from nltk.tokenize import word_tokenize, sent_tokenize
-import fuzzy # phonetic representation 
+import fuzzy
 import Levenshtein as pylev
 import os.path
 import json
@@ -107,7 +106,7 @@ def alliteration(poem):
     return (letter_freqs[0][1]+letter_freqs[1][1])/total_words
 
 # Sum of parse height of each line
-def parse_heightBAD(poem):
+def parse_height(poem):
     global height_memo
     # Sum of parse height for each line
     total_parse_height = 0.1
@@ -170,7 +169,7 @@ def poem_fitness(poem):
     global max_phon 
     
     alliteration_score = alliteration(poem)
-    parse_height_score = parse_heightBAD(poem)
+    parse_height_score = parse_height(poem)
     phonetic_similarity_score = phonetic_similarity(poem)
 
     if alliteration_score > max_alliteration:
@@ -334,6 +333,7 @@ def main():
         candidates = children
         generation_counter += 1
 
+    # Results!
     scored_candidates = []
     for candidate in candidates:
         fitness = poem_fitness(candidate)
