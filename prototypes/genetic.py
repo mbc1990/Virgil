@@ -19,9 +19,9 @@ parser = Parser()
 def generate_outline():
     #return ['winter', 'owl', 'snow', 'sadness']
     #return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
-    #return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
+    return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
     #return ['sleep', 'warm', 'dream', 'tire', 'drift']
-    return ['stars', 'night', 'quiet', 'clear']
+    #return ['stars', 'night', 'quiet', 'clear']
 
 tmap = {}
 token2ngrams = {}
@@ -49,10 +49,14 @@ def get_tokens():
             tokens = json.load(toks)
             return tokens
     else:
+        corpuses = ['god_and_the_state.txt', 'domestic_animals.txt', 'treatise_of_human_nature.txt', 'heart_of_darkness.txt', 'walden.txt','the_prince.txt', 'grimm_fairy_tails.txt', 'kama_sutra.txt', 'tail_of_two_cities.txt', 'ulysses.txt', 'metamorphosis.txt', 'dorian_gray.txt', 'treasure_island.txt', 'the_republic.txt', 'the_time_machine.txt']
         print "making tokens"
         tokens = []
+        corpus_counter = 1
         for c in corpuses:
-            with open(c) as fd:
+            print 'corpus '+str(corpus_counter)+'/'+str(len(corpuses))
+            corpus_counter += 1
+            with open('../corpus/'+c) as fd:
                 content = fd.read()
                 sentences = sent_tokenize(content)
                 for s in sentences:
@@ -188,7 +192,7 @@ def poem_fitness(poem):
     print 'Parse height: '+str(parse_height_score)
     print 'Phon similar: '+str(phonetic_similarity_score)
 
-    score = alliteration_score*10*phonetic_similarity_score/parse_height_score
+    score = ((alliteration_score*2)+phonetic_similarity_score)/parse_height_score
     return score
 
 # Randomly decided whether or not to mutate
@@ -286,8 +290,8 @@ def main():
             cur_poem = []
     print str(len(candidates))+" candidate poems"
     print str(time.time() - start_time)+" seconds"
-    generations = 5
-    breeding_fraction = .3 # Top fraction of candidates allowed to breed
+    generations = 7
+    breeding_fraction = .25 # Top fraction of candidates allowed to breed
     mutation_prob = .05 # Probability that a child will be mutated
     generation_counter = 1
     while generation_counter <= generations:
