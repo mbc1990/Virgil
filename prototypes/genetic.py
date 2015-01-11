@@ -19,9 +19,9 @@ parser = Parser()
 def generate_outline():
     #return ['winter', 'owl', 'snow', 'sadness']
     #return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
-    return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
+    #return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
     #return ['sleep', 'warm', 'dream', 'tire', 'drift']
-    #return ['stars', 'night', 'quiet', 'clear']
+    return ['stars', 'night', 'quiet', 'clear']
 
 tmap = {}
 token2ngrams = {}
@@ -110,7 +110,7 @@ def alliteration(poem):
     return (letter_freqs[0][1]+letter_freqs[1][1])/total_words
 
 # Sum of parse height of each line
-def parse_height(poem):
+def line_parse_height(poem):
     global height_memo
     # Sum of parse height for each line
     total_parse_height = 0.1
@@ -132,6 +132,32 @@ def parse_height(poem):
 
         return total_parse_height
 
+# Like line_parse_height, but the sum of parse heights for each pair of adjacent lines
+# This rewards grammatical continuity across lines
+def line_pair_parse_height(poem):
+    global height_memo
+    # Sum of parse height for each pair of lines
+    total_parse_height = 0.1
+    for i in range(0,len(poem)-1):
+        line = poem[i]
+        next_line = poem[i+1]
+        line_pair = line + next_line
+        # Parse height
+        parse_height = 0
+        if tuple(line_pair) in height_memo:
+            parse_height = height_memo[tuple(line_pair)]
+            height_memo[tuple(line_pair)] = parse_height
+        else:
+            try:
+                parse_tree = parser.parse(' '.join(line_pair))
+                parse_height = parse_tree.height()
+                height_memo[tuple(line_pair)] = parse_height
+            except:
+                height_memo[tuple(line_pair)] = 0.1
+                return 0.1 # Return 0.1 if there's an error parsing a poem line
+        total_parse_height += parse_height
+
+        return total_parse_height
 
 
 def phonetic_similarity(poem):
@@ -173,7 +199,7 @@ def poem_fitness(poem):
     global max_phon 
     
     alliteration_score = alliteration(poem)
-    parse_height_score = parse_height(poem)
+    parse_height_score = line_pair_parse_height(poem)
     phonetic_similarity_score = phonetic_similarity(poem)
 
     if alliteration_score > max_alliteration:
@@ -280,7 +306,7 @@ def main():
     cur_poem = []
     candidates = []
     poem_length = 6 # Number of lines in a poem
-    for i in range(0,10000):
+    for i in range(0,1000):
         outline_word = choice(outline)
         candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
         if len(cur_poem) < poem_length:
