@@ -192,7 +192,7 @@ def poem_fitness(poem):
     print 'Parse height: '+str(parse_height_score)
     print 'Phon similar: '+str(phonetic_similarity_score)
 
-    score = alliteration_score*2*phonetic_similarity_score/parse_height_score
+    score = ((alliteration_score*2)+phonetic_similarity_score)/parse_height_score
     return score
 
 # Randomly decided whether or not to mutate
@@ -290,7 +290,7 @@ def main():
             cur_poem = []
     print str(len(candidates))+" candidate poems"
     print str(time.time() - start_time)+" seconds"
-    generations = 5
+    generations = 7
     breeding_fraction = .25 # Top fraction of candidates allowed to breed
     mutation_prob = .05 # Probability that a child will be mutated
     generation_counter = 1
