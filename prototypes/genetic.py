@@ -15,13 +15,21 @@ from random import shuffle
 from stat_parser import Parser
 parser = Parser()
 
+# Constants 
+generations = 7
+breeding_fraction = .25 # Top fraction of candidates allowed to breed
+mutation_prob = .05 # Probability that a child will be mutated
+poem_length = 6 # Number of lines in a poem
+starter_pop_word_limit = 1000 # Roughly 10x the number of starting candidates. TODO: Replace this hacky population limiting effort with a strict limit 
+
 # Generates an outline, against which the candidate poems are measured 
 def generate_outline():
-    #return ['winter', 'owl', 'snow', 'sadness']
+    return ['winter', 'owl', 'snow', 'sadness']
     #return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
     #return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
     #return ['sleep', 'warm', 'dream', 'tire', 'drift']
-    return ['stars', 'night', 'quiet', 'clear']
+    #return ['stars', 'night', 'quiet', 'clear']
+    #return ['cat', 'sun', 'sleep', 'field', 'tree']
 
 tmap = {}
 token2ngrams = {}
@@ -305,8 +313,7 @@ def main():
     start_time = time.time()
     cur_poem = []
     candidates = []
-    poem_length = 6 # Number of lines in a poem
-    for i in range(0,1000):
+    for i in range(0, starter_pop_word_limit):
         outline_word = choice(outline)
         candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
         if len(cur_poem) < poem_length:
@@ -316,9 +323,7 @@ def main():
             cur_poem = []
     print str(len(candidates))+" candidate poems"
     print str(time.time() - start_time)+" seconds"
-    generations = 7
-    breeding_fraction = .25 # Top fraction of candidates allowed to breed
-    mutation_prob = .05 # Probability that a child will be mutated
+
     generation_counter = 1
     while generation_counter <= generations:
         # Get a fitness score for each poem 
