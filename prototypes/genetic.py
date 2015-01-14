@@ -20,7 +20,7 @@ generations = 7
 breeding_fraction = .25 # Top fraction of candidates allowed to breed
 mutation_prob = .05 # Probability that a child will be mutated
 poem_length = 6 # Number of lines in a poem
-starting_population_size = 100
+starting_population_size = 50
 
 # Generates an outline, against which the candidate poems are measured 
 def generate_outline():
@@ -361,7 +361,7 @@ def main():
         children = []
         num_replacements = math.ceil(1/breeding_fraction)
         for parent in parent_pairs:
-            for k in range(0,int(num_replacements/2)):
+            for k in range(0,2+int(math.ceil(num_replacements/2))): # Parents replace themselves + at least their proportion of the culled generation 
                 crossovers = crossover(parent[0], parent[1])
                 children.append(mutate(crossovers[0], mutation_prob))
                 children.append(mutate(crossovers[1], mutation_prob))
