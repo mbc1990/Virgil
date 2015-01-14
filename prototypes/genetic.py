@@ -20,7 +20,7 @@ generations = 7
 breeding_fraction = .25 # Top fraction of candidates allowed to breed
 mutation_prob = .05 # Probability that a child will be mutated
 poem_length = 6 # Number of lines in a poem
-starter_pop_word_limit = 1000 # Roughly 10x the number of starting candidates. TODO: Replace this hacky population limiting effort with a strict limit 
+starting_population_size = 100
 
 # Generates an outline, against which the candidate poems are measured 
 def generate_outline():
@@ -313,14 +313,16 @@ def main():
     start_time = time.time()
     cur_poem = []
     candidates = []
-    for i in range(0, starter_pop_word_limit):
-        outline_word = choice(outline)
-        candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
-        if len(cur_poem) < poem_length:
-            cur_poem.append(candidate_line)
-        else:
-            candidates.append(cur_poem)
-            cur_poem = []
+
+    # Generate starting population
+    for i in range(0, starting_population_size):
+        next_poem = []
+        for k in range(0, poem_length):
+            outline_word = choice(outline)
+            candidate_line = generate_candidate_line(outline_word, 2, 2, 10)
+            next_poem.append(candidate_line)
+        candidates.append(next_poem)
+            
     print str(len(candidates))+" candidate poems"
     print str(time.time() - start_time)+" seconds"
 
