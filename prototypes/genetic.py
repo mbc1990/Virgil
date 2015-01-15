@@ -16,11 +16,11 @@ from stat_parser import Parser
 parser = Parser()
 
 # Constants 
-generations = 7
-breeding_fraction = .25 # Top fraction of candidates allowed to breed
+generations = 7 # Number of selection-breeding processes
+breeding_fraction = .25 # Top fraction of candidates selected to breed
 mutation_prob = .05 # Probability that a child will be mutated
 poem_length = 6 # Number of lines in a poem
-starting_population_size = 50
+starting_population_size = 50 # Number of poems the algorithm begins with 
 
 # Generates an outline, against which the candidate poems are measured 
 def generate_outline():
@@ -76,8 +76,7 @@ def get_tokens():
 
 # Generates a candidate 
 def generate_candidate_line(keyword, n, min_length, max_length):
-    rand = randint(0, len(token2ngrams[keyword])-1)
-    starter_ngram = token2ngrams[keyword][rand]
+    starter_ngram = choice(token2ngrams[keyword])
     line_length = randint(min_length, max_length)
     line = list(starter_ngram)
     while len(line) < line_length:
@@ -198,6 +197,16 @@ def phonetic_similarity(poem):
     phon_value /= len(phonetic_lines)
     return phon_value
 
+# Sanity checks that, if failed, deem a poem completely unfit 
+def default_unfit(poem):
+    # A line should never start with punctuation
+    punctuation = [',','.','\'', '"', '(', ')', '!', '?', ';']
+    for line in poem:
+        if line[0] in punctuation:
+            return True 
+    return False 
+    
+
 
 # Fitness function for an individual poem, the higher the return value the more fit an individual is 
 def poem_fitness(poem):
@@ -205,7 +214,11 @@ def poem_fitness(poem):
     global max_alliteration
     global min_phon 
     global max_phon 
-    
+
+    # Don't both computing anything if this poem has something inherently wrong with it 
+    if default_unfit(poem):
+        return -1
+
     alliteration_score = alliteration(poem)
     parse_height_score = line_pair_parse_height(poem)
     phonetic_similarity_score = phonetic_similarity(poem)
@@ -262,7 +275,7 @@ def print_human_text(poem):
     outpt = "\n"
     for line in poem: 
         for t in line:
-            if len(outpt) != 0 and t not in [',', '.', '!', '\n', ';','\'']:
+            if len(outpt) != 0 and t not in [',', '.', '!', '\n', ';','\'', ':']:
                 outpt += " "
             outpt += t
         outpt += '\n'
