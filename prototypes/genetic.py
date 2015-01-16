@@ -1,4 +1,5 @@
 
+import sys
 import time
 from random import randint
 from random import choice
@@ -16,31 +17,56 @@ from stat_parser import Parser
 parser = Parser()
 
 # Constants 
-generations = 7 # Number of selection-breeding processes
-breeding_fraction = .25 # Top fraction of candidates selected to breed
+generations = 2 # Number of selection-breeding processes
+breeding_fraction = .35 # Top fraction of candidates selected to breed
 mutation_prob = .05 # Probability that a child will be mutated
 poem_length = 6 # Number of lines in a poem
-starting_population_size = 50 # Number of poems the algorithm begins with 
+starting_population_size = 25 # Number of poems the algorithm begins with 
 
-# Generates an outline, against which the candidate poems are measured 
+# Globals 
+ngram2following_tokens = {} # tuple of ngram -> list of tokens that follow it in the corpus (used in markov chain) 
+token2ngrams = {} # token -> ngrams it is a member of
+height_memo = {} # tuple -> parse height  
+
+# Generates a set of synonyms from the input words 
 def generate_outline():
-    return ['winter', 'owl', 'snow', 'sadness']
+
+    starting_words = ['cat', 'sun', 'sleep', 'field', 'tree']
+
+    # Get synonyms for every input word 
+    expanded_outline = []
+    for keyword in starting_words:
+        synsets = wordnet.synsets(keyword)
+        syn_strings = [x.name.split('.')[0] for x in synsets] # get english token from synset
+        expanded_outline += syn_strings
+
+    # Clean the expanded outline 
+    pruned_outline = []
+    for word in expanded_outline: 
+        # Deduplicate expanded outline
+        # Remove anything with an underscore (two-word synonyms such as "big cat" as in big cat vs. house cat)
+        # Throw out any words that aren't in the markov model 
+        if word in token2ngrams and word not in pruned_outline and '_' not in word:
+            pruned_outline.append(word)
+    expanded_outline = pruned_outline
+
+    return expanded_outline
+
+    #return ['winter', 'owl', 'snow', 'sadness']
     #return ['heat', 'light', 'sun', 'happy', 'cat', 'soft', 'fur', 'love', 'sunrise']
     #return ['fur', 'soft', 'warm', 'snow', 'mountain', 'morning', 'sunrise', 'dense']
     #return ['sleep', 'warm', 'dream', 'tire', 'drift']
     #return ['stars', 'night', 'quiet', 'clear']
     #return ['cat', 'sun', 'sleep', 'field', 'tree']
 
-tmap = {}
-token2ngrams = {}
 def build_markov_model(tokens, n):
-    global tmap
+    global ngram2following_tokens
     global token2ngrams
     for i in range(0, len(tokens) - n):
         if 'SENTENCE_START' not in tokens[i:i+n+1]:
-            if tuple(tokens[i:i+n]) not in tmap:
-                tmap[tuple(tokens[i:i+n])] = []
-            tmap[tuple(tokens[i:i+n])].append(tokens[i+n])
+            if tuple(tokens[i:i+n]) not in ngram2following_tokens:
+                ngram2following_tokens[tuple(tokens[i:i+n])] = []
+            ngram2following_tokens[tuple(tokens[i:i+n])].append(tokens[i+n])
 
             # ngrams for generating starting "seeds"
             toks = tokens[i:i+n]
@@ -82,17 +108,16 @@ def generate_candidate_line(keyword, n, min_length, max_length):
     while len(line) < line_length:
         ngram = tuple(line[-n:]) 
         # Handle sentence ending tokens with no candidates by terminating the line
-        if ngram not in tmap:
+        if ngram not in ngram2following_tokens:
             return line
-        candidates = tmap[ngram]
+        candidates = ngram2following_tokens[ngram]
         nextToken = choice(candidates)
         line.append(nextToken)
     return line
 
 
-height_memo = {} # tuple -> parse height  
+# Alliteration factor - poems where more of the words start with the same two letters are considered more fit
 def alliteration(poem):
-    # Alliteration factor - poems where more of the words start with the same two letters are considered more fit
     total_words = 0.0
     letters = {}
     for line in poem:
