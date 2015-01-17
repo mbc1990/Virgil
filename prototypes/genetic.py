@@ -17,11 +17,11 @@ from stat_parser import Parser
 parser = Parser()
 
 # Constants 
-generations = 2 # Number of selection-breeding processes
+generations = 5 # Number of selection-breeding processes
 breeding_fraction = .35 # Top fraction of candidates selected to breed
 mutation_prob = .05 # Probability that a child will be mutated
 poem_length = 6 # Number of lines in a poem
-starting_population_size = 25 # Number of poems the algorithm begins with 
+starting_population_size = 100 # Number of poems the algorithm begins with 
 
 # Globals 
 ngram2following_tokens = {} # tuple of ngram -> list of tokens that follow it in the corpus (used in markov chain) 
@@ -31,7 +31,8 @@ height_memo = {} # tuple -> parse height
 # Generates a set of synonyms from the input words 
 def generate_outline():
 
-    starting_words = ['cat', 'sun', 'sleep', 'field', 'tree']
+    #starting_words = ['cat', 'sun', 'sleep', 'field', 'tree']
+    starting_words = ['stars', 'night', 'quiet', 'clear']
 
     # Get synonyms for every input word 
     expanded_outline = []
@@ -334,6 +335,7 @@ min_phon = 1
 max_phon = 0
 min_alliteration = 1
 max_alliteration = 0
+# TODO: Heuristic for not ending poems with sentence fragments 
 def main():
     load_parse_height_cache()
 
