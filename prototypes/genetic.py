@@ -382,6 +382,7 @@ def main():
         scored_candidates.reverse()
 
         # Select the top 1/n for some n for breeding
+        # TODO: Different selection methods (tournament, roulette wheel)
         parents = scored_candidates[0: int(math.ceil(len(scored_candidates) * breeding_fraction))]
 
         # Remove scores
