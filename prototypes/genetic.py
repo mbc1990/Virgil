@@ -22,6 +22,8 @@ breeding_fraction = .35 # Top fraction of candidates selected to breed
 mutation_prob = .05 # Probability that a child will be mutated
 poem_length = 6 # Number of lines in a poem
 starting_population_size = 100 # Number of poems the algorithm begins with 
+tournament_size = 2 # Number of individuals in each tournament
+tournament_probability = .5 # Probability of selecting the fitter individual
 
 # Globals 
 ngram2following_tokens = {} # tuple of ngram -> list of tokens that follow it in the corpus (used in markov chain) 
@@ -376,6 +378,16 @@ def main():
             counter += 1
             print str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(generations)+' with '+str(len(height_memo))+' cached line parse heights'
             scored_candidates.append((candidate, fitness))
+
+        # Tournament selection
+        # While the number of reproducing pairs hasn't been reached 
+            # Select tournament_size poems at random 
+            # Draw a random number between 0 and 1
+            # If that number is greater than tournament_probability
+                # Pick the most fit candidate
+            # Else
+                # Randomly pick one of the lesser candidates (?)
+
             
         # Sort poems by fitness 
         scored_candidates.sort(key=operator.itemgetter(1))
