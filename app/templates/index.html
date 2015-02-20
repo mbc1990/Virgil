@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script>
+
+        function generatePoem() {
+            console.log("generating poem");        
+        }
+
+    </script>
+</head>
+    <h1>Heyo</h1>
+    <form action="" class="form-horizontal" method="post" name="poem">
+        {{ form.hidden_tag() }}
+        <p>
+        Enter some seed words:<br>
+        {{ form.seed_words(size=250) }}<br>
+        </p>
+        <p><input class="btn btn-primary" type="submit" value="Generate!" onClick="generatePoem();"></p>
+    </form>
+{% endblock %}

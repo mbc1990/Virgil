@@ -1,0 +1,13 @@
+
+
+#content_wrapper { 
+    border-width: 0px;
+    border-left-width: 1px;
+    border-style: solid;
+    border-color: black;
+
+}
+
+.container {
+    max-width: 600px;
+}
