@@ -1,23 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<head>
-    <script>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <form action="" class="form-horizontal" method="post" name="poem">
+                    {{ form.hidden_tag() }}
+                    <p>
+                    Enter some comma-separated seed words:<br>
+                    {{ form.seed_words(size=25) }}<br>
+                    </p>
+                    <p><input class="btn btn-primary" type="submit" value="Generate!"></p>
+                </form>
 
-    </script>
-</head>
-    <h1>Heyo</h1>
-    <form action="" class="form-horizontal" method="post" name="poem">
-        {{ form.hidden_tag() }}
-        <p>
-        Enter some comma-separated seed words:<br>
-        {{ form.seed_words(size=25) }}<br>
-        </p>
-        <p><input class="btn btn-primary" type="submit" value="Generate!"></p>
-    </form>
-
-    {% for poem in poems%}
-        Poem!
-        {% include 'poem.html' %}
-    {% endfor %}
+            </div>
+            <div class="col-md-6">
+                <h4> Some poems</h4>
+                {% for poem in poems%}
+                    {% include 'poem.html' %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
