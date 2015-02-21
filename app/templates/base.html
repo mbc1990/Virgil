@@ -33,13 +33,10 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
         </nav>
-
-        <div class="container">
-            <div class="row">
-                <div id="content_wrapper" class="col-md-12">
-                    {% block content %}{% endblock %}
-                </div>
-            </div>
+        
+        <div id="content-wrapper">
+            {% block content %}{% endblock %}
         </div>
+
     </body>
 </html>
