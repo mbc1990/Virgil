@@ -1,4 +1,80 @@
-<b> {{ poem.id }}</b>
-{% for seed_word in poem.seed_words %}
-    {{ seed_word.word }}
-{% endfor %}
+<div class="poem">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered table-condensed meta-data-table">
+                <tr class="meta-info-title">
+                    <td>
+                       Fittest Candidate 
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ poem.text }}
+                        This is a fake poem<br>
+                        There is another line<br>
+                        And a single word<br>
+                        end<br>
+                    </td>
+                </tr>
+            </table>
+            <table class="table table-bordered table-condensed meta-data-table">
+                <tr class="meta-info-title">
+                    <td>
+                        Generations
+                    </td>
+                    <td>
+                        Mutation 
+                    </td>
+                    <td>
+                        Phonetic Similarity 
+                    </td>
+                    <td>
+                        Breeding Fraction 
+                    </td>
+                    <td>
+                        Starting Population 
+                    </td>
+                </tr>
+                <tr class="meta-info-value">
+                    <td>
+                        <span >{{ poem.generations }}</span>
+                    </td>
+                    <td>
+                        <span> {{ poem.mutation_probability }}</span>
+                    </td>
+                    <td>
+                        <span> {{ poem.phonetic_similarity_weight }}</span>
+                    </td>
+                    <td>
+                        <span> {{ poem.breeding_fraction }} </span>
+                    </td>
+                    <td>
+                        <span> {{ poem.starting_population_size }}</span>
+                    </td>
+                </tr>
+            </table>
+            <table class="table table-bordered table-condensed meta-data-table">
+                <tr class="meta-info-title">
+                    <td>
+                        Seed Words
+                    </td>
+                </tr>
+                <tr class="meta-info-value">
+                    <td>
+                        {% for seed_word in poem.seed_words %}
+                            {{ seed_word.word }}
+                        {% endfor %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="poem-links">
+                <a href="#">Submit to Favorites</a>
+                | <a href="#">Share on Facebook</a>
+            </div>
+        </div>
+    </div>
+</div>
