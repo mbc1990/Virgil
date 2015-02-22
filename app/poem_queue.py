@@ -1,5 +1,4 @@
 
-# Import Virgil code 
 from app import poem_generator
 
 MAX_CONCURRENT_POEMS = 2

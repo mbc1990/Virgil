@@ -103,19 +103,21 @@ class Poem_Generator:
 
     def __init__(self, poem):
         print "Poem generator init"
-        #TODO: Use the actual paramters here
-        self.generations = 3 # Number of selection-breeding processes
-        self.breeding_fraction = .35 # Top fraction of candidates selected to breed
-        self.mutation_prob = .05 # Probability that a child will be mutated
-        self.poem_length = 6 # Number of lines in a poem
-        self.starting_population_size = 50 # Number of poems the algorithm begins with 
-        self.seed_words = ['cat', 'winter'] # Input "idea"
+        #TODO: Use the actual paramters here (do this next)
+
+        self.generations = poem.generations # Number of selection-breeding processes
+        self.breeding_fraction = poem.breeding_fraction # .35 # Top fraction of candidates selected to breed
+        self.mutation_prob = poem.mutation_probability #.05 # Probability that a child will be mutated
+        self.poem_length = poem.lines #6 # Number of lines in a poem
+        self.starting_population_size = poem.starting_population_size #50 # Number of poems the algorithm begins with 
+        self.phonetic_similarity_weight = poem.phonetic_similarity_weight
+        self.seed_words = poem.seed_words.all() #['cat', 'winter'] # Input "idea"
         self.poem = poem #ORM object that will be updated as the poem is generated
 
     # Generates a set of synonyms from the input words 
     def generate_outline(self):
 
-        #TODO: Replace with seed words array
+        #TODO: Replace with seed words array 
         starting_words = ['stars', 'night', 'quiet', 'clear']
 
         # Get synonyms for every input word 
@@ -282,7 +284,7 @@ class Poem_Generator:
         alliteration_score = self.alliteration(poem)
         parse_height_score = self.line_pair_parse_height(poem)
         phonetic_similarity_score = self.phonetic_similarity(poem)
-
+        
         print 'Alliteration: '+str(alliteration_score)
         print 'Parse height: '+str(parse_height_score)
         print 'Phon similar: '+str(phonetic_similarity_score)
