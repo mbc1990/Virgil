@@ -16,7 +16,7 @@ class Poem(db.Model):
     seed_words = db.relationship('Seed_Word', backref='poem', lazy='dynamic')
 
     def __repr__(self):
-        return 'Poem: %r' % (self.text)
+        return 'Poem: %r' % (self.seed_words)
 
 class Seed_Word(db.Model):
     id = db.Column(db.Integer, primary_key=True)

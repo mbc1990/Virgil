@@ -13,6 +13,7 @@ import operator
 import math
 from random import shuffle
 from stat_parser import Parser
+from app import db
 parser = Parser()
 
 class Poem_Generator:
@@ -30,7 +31,7 @@ class Poem_Generator:
                 for key in height_cache_saved['key_map'].keys():
                     tup_key = tuple(height_cache_saved['key_map'][key])
                     height_value = height_cache_saved['saved_cache'][key]
-                    height_memo[tup_key] = height_value
+                    Poem_Generator.height_memo[tup_key] = height_value
 
     # Save the updated height cache
     @staticmethod
@@ -39,9 +40,9 @@ class Poem_Generator:
             key_map_counter = 0
             key_map = {}
             saved_cache = {}
-            for key in height_memo.keys():
+            for key in Poem_Generator.height_memo.keys():
                 key_map[key_map_counter] = key 
-                saved_cache[key_map_counter] = height_memo[key]
+                saved_cache[key_map_counter] = Poem_Generator.height_memo[key]
                 key_map_counter += 1
             output = {'key_map': key_map, 'saved_cache': saved_cache}
             json.dump(output, fp)
@@ -103,11 +104,11 @@ class Poem_Generator:
     def __init__(self, poem):
         print "Poem generator init"
         #TODO: Use the actual paramters here
-        self.generations = 5 # Number of selection-breeding processes
+        self.generations = 3 # Number of selection-breeding processes
         self.breeding_fraction = .35 # Top fraction of candidates selected to breed
         self.mutation_prob = .05 # Probability that a child will be mutated
         self.poem_length = 6 # Number of lines in a poem
-        self.starting_population_size = 100 # Number of poems the algorithm begins with 
+        self.starting_population_size = 50 # Number of poems the algorithm begins with 
         self.seed_words = ['cat', 'winter'] # Input "idea"
         self.poem = poem #ORM object that will be updated as the poem is generated
 
@@ -289,6 +290,17 @@ class Poem_Generator:
         score = ((alliteration_score*2)+phonetic_similarity_score)/parse_height_score
         return score
 
+    # Returns a string form of the poem
+    def stringify_poem(self, poem):
+        output = ""
+        for line in poem: 
+            for t in line:
+                if len(output) != 0 and t not in [',', '.', '!', '\n', ';','\'', ':']:
+                    output += " "
+                output += t
+            output += '\n'
+        return output
+
 
     def start_poem(self, poem):
         print "Starting new poem"
@@ -361,11 +373,13 @@ class Poem_Generator:
         scored_candidates.reverse()
         
         # Take the fittest candidate
-        best_candidate = scored_candidates[:1]
-        print "Best candidate: "+str(best_candidate)
+        best_candidate = scored_candidates[0]
+        best_candidate_str = self.stringify_poem(best_candidate[0])
+        print best_candidate_str
 
-        #TODO: Update the database
-            
+        poem.text = best_candidate_str        
+        db.session.add(poem)
+        db.session.commit()
 
         # Save parse height cache
         self.dump_parse_height_cache()
