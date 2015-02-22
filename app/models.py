@@ -11,11 +11,12 @@ class Poem(db.Model):
     starting_population_size = db.Column(db.Integer)
     lines = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime)
+    current_generation = db.Column(db.Integer)
 
     seed_words = db.relationship('Seed_Word', backref='poem', lazy='dynamic')
 
     def __repr__(self):
-        return 'Poem: %r' % (self.text)
+        return 'Poem: %r' % (self.seed_words)
 
 class Seed_Word(db.Model):
     id = db.Column(db.Integer, primary_key=True)
