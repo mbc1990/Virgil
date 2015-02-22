@@ -20,18 +20,6 @@ class Poem_Generator:
     ngram2following_tokens = {} # tuple of ngram -> list of tokens that follow it in the corpus (used in markov chain) 
     token2ngrams = {} # token -> ngrams it is a member of
     height_memo = {} # tuple -> parse height  
-    
-    def __init__(self, poem):
-        print "Poem generator init"
-        #TODO: Use the actual paramters here
-        self.generations = 5 # Number of selection-breeding processes
-        self.breeding_fraction = .35 # Top fraction of candidates selected to breed
-        self.mutation_prob = .05 # Probability that a child will be mutated
-        self.poem_length = 6 # Number of lines in a poem
-        self.starting_population_size = 100 # Number of poems the algorithm begins with 
-        self.seed_words = ['cat', 'winter'] # Input "idea"
-        self.poem = poem #ORM object that will be updated as the poem is generated
-
 
     # Load parse height cache
     @staticmethod 
@@ -111,5 +99,274 @@ class Poem_Generator:
         Poem_Generator.build_markov_model(tokens, 2)
 
 
+
+    def __init__(self, poem):
+        print "Poem generator init"
+        #TODO: Use the actual paramters here
+        self.generations = 5 # Number of selection-breeding processes
+        self.breeding_fraction = .35 # Top fraction of candidates selected to breed
+        self.mutation_prob = .05 # Probability that a child will be mutated
+        self.poem_length = 6 # Number of lines in a poem
+        self.starting_population_size = 100 # Number of poems the algorithm begins with 
+        self.seed_words = ['cat', 'winter'] # Input "idea"
+        self.poem = poem #ORM object that will be updated as the poem is generated
+
+    # Generates a set of synonyms from the input words 
+    def generate_outline(self):
+
+        #TODO: Replace with seed words array
+        starting_words = ['stars', 'night', 'quiet', 'clear']
+
+        # Get synonyms for every input word 
+        expanded_outline = []
+        for keyword in starting_words:
+            synsets = wordnet.synsets(keyword)
+            syn_strings = [x.name.split('.')[0] for x in synsets] # get english token from synset
+            expanded_outline += syn_strings
+
+        # Clean the expanded outline 
+        pruned_outline = []
+        for word in expanded_outline: 
+            # Deduplicate expanded outline
+            # Remove anything with an underscore (two-word synonyms such as "big cat" as in big cat vs. house cat)
+            # Throw out any words that aren't in the markov model 
+            if word in Poem_Generator.token2ngrams and word not in pruned_outline and '_' not in word:
+                pruned_outline.append(word)
+        expanded_outline = pruned_outline
+        return expanded_outline
+
+    # Generates a candidate 
+    def generate_candidate_line(self, keyword, n, min_length, max_length):
+        starter_ngram = choice(Poem_Generator.token2ngrams[keyword])
+        line_length = randint(min_length, max_length)
+        line = list(starter_ngram)
+        while len(line) < line_length:
+            ngram = tuple(line[-n:]) 
+            # Handle sentence ending tokens with no candidates by terminating the line
+            if ngram not in Poem_Generator.ngram2following_tokens:
+                return line
+            candidates = Poem_Generator.ngram2following_tokens[ngram]
+            nextToken = choice(candidates)
+            line.append(nextToken)
+        return line
+
+    # Alliteration factor - poems where more of the words start with the same two letters are considered more fit
+    def alliteration(self, poem):
+        total_words = 0.0
+        letters = {}
+        for line in poem:
+            for word in line:
+                # Populate letter counts for alliteration metric 
+                total_words += 1
+                first_letter = word[0].lower()
+                if first_letter not in letters:
+                    letters[first_letter] = 0
+                letters[first_letter] += 1
+
+        # Calculate alliteration value 
+        letter_freqs = []
+        alphabet = 'abcdefghijklmnopqrstuvwxyz'
+        for letter in alphabet:
+            if letter in letters:
+                letter_freqs.append((letter,letters[letter]))
+        letter_freqs.sort(key=operator.itemgetter(1))
+        letter_freqs.reverse()
+        
+        # sum of two most frequent letters divided by total number of words
+        return (letter_freqs[0][1]+letter_freqs[1][1])/total_words
+
+    # Sanity checks that, if failed, deem a poem completely unfit 
+    def default_unfit(self, poem):
+        # A line should never start with punctuation
+        punctuation = [',','.','\'', '"', '(', ')', '!', '?', ';']
+        for line in poem:
+            if line[0] in punctuation:
+                return True 
+        return False 
+
+
+    # Like line_parse_height, but the sum of parse heights for each pair of adjacent lines
+    # This rewards grammatical continuity across lines
+    def line_pair_parse_height(self, poem):
+        # Sum of parse height for each pair of lines
+        total_parse_height = 0.1
+        for i in range(0,len(poem)-1):
+            line = poem[i]
+            next_line = poem[i+1]
+            line_pair = line + next_line
+            # Parse height
+            parse_height = 0
+            if tuple(line_pair) in Poem_Generator.height_memo:
+                parse_height = Poem_Generator.height_memo[tuple(line_pair)]
+                Poem_Generator.height_memo[tuple(line_pair)] = parse_height
+            else:
+                try:
+                    parse_tree = parser.parse(' '.join(line_pair))
+                    parse_height = parse_tree.height()
+                    Poem_Generator.height_memo[tuple(line_pair)] = parse_height
+                except:
+                    Poem_Generator.height_memo[tuple(line_pair)] = 0.1
+                    return 0.1 # Return 0.1 if there's an error parsing a poem line
+            total_parse_height += parse_height
+
+            return total_parse_height
+
+    def phonetic_similarity(self, poem):
+        # Phonetic representation of each line
+        phonetic_lines = []
+        for line in poem:
+            phon_line = []
+            for word in line:
+                phon_line.append(fuzzy.nysiis(word))
+            phonetic_lines.append(phon_line)
+
+        # Calculate phonetic value
+        phon_value = 0.1
+        for i in range(0, len(phonetic_lines)-1):
+            last_word = str(phonetic_lines[i][-1])
+            next_last_word = str(phonetic_lines[i+1][-1])
+
+            # Throw out identical sounding words (TODO: Check their original words, not phonetic representations)
+            if last_word != next_last_word and len(last_word) > 0 and len(next_last_word) > 0:
+                lev_dist = pylev.distance(last_word, next_last_word)
+
+                # Divide distance by word length since eg morning - mourning is a way better similarity than hat - had 
+                lev_dist = lev_dist/float((len(last_word) + len(next_last_word)))
+                phon_value += lev_dist
+                #print 'Potential rhyme pair: '+last_word +' '+next_last_word+' with dist: '+str(lev_dist)
+            else:
+                phon_value += 1 # very unsimilar for two words that are too short
+
+        # Normalize by poem length (in case variable length poems are allowed)
+        phon_value /= len(phonetic_lines)
+        return phon_value
+
+    # 1 point crossover between two poems
+    def crossover(self, p1, p2):
+        
+        # Maximum crossover location (shortest of the two poems)
+        max_point = len(p1)
+        if max_point > len(p2):
+            max_point = len(p2)
+
+        crossover_point = randint(0, max_point)
+        
+        child1 = p1[:crossover_point]+p2[crossover_point:]
+        child2 = p2[:crossover_point]+p1[crossover_point:]
+        return (child1, child2)
+
+    # Randomly decided whether or not to mutate
+    def mutate(self, poem, probability):
+        rand = random.uniform(0,1)
+
+        # randomly switch two adjacent words 
+        if rand <= probability:
+            line_index = random.randint(0,len(poem)-1)
+            word_index = random.randint(0,len(poem[line_index])-2)
+            line = poem[line_index]
+            first_part = line[:word_index]
+            switch = [line[word_index+1]] + [line[word_index]]
+            second_part = line[word_index+2:]
+            poem[line_index] = first_part + switch + second_part
+        return poem
+
+
+    # Fitness function for an individual poem, the higher the return value the more fit an individual is 
+    def poem_fitness(self, poem):
+
+        # Don't both computing anything if this poem has something inherently wrong with it 
+        if self.default_unfit(poem):
+            return -1
+
+        alliteration_score = self.alliteration(poem)
+        parse_height_score = self.line_pair_parse_height(poem)
+        phonetic_similarity_score = self.phonetic_similarity(poem)
+
+        print 'Alliteration: '+str(alliteration_score)
+        print 'Parse height: '+str(parse_height_score)
+        print 'Phon similar: '+str(phonetic_similarity_score)
+
+        score = ((alliteration_score*2)+phonetic_similarity_score)/parse_height_score
+        return score
+
+
     def start_poem(self, poem):
         print "Starting new poem"
+        # This will eventually use WordNet to turn the 1-5 word outline into 10-50 words 
+        outline = self.generate_outline()
+
+        # Generate starting population
+        candidates = []
+        for i in range(0, self.starting_population_size):
+            next_poem = []
+            for k in range(0, self.poem_length):
+                outline_word = choice(outline)
+                candidate_line = self.generate_candidate_line(outline_word, 2, 2, 10)
+                next_poem.append(candidate_line)
+            candidates.append(next_poem)
+
+        generation_counter = 1
+        while generation_counter <= self.generations:
+            # Get a fitness score for each poem 
+            scored_candidates = []
+            counter = 0
+            for candidate in candidates:
+                fitness = self.poem_fitness(candidate)
+                counter += 1
+                print str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(self.generations)+' with '+str(len(Poem_Generator.height_memo))+' cached line parse heights'
+                scored_candidates.append((candidate, fitness))
+                
+            # Sort poems by fitness 
+            scored_candidates.sort(key=operator.itemgetter(1))
+            scored_candidates.reverse()
+
+            # Select the top 1/n for some n for breeding
+            # TODO: Different selection methods (tournament, roulette wheel)
+            parents = scored_candidates[0: int(math.ceil(len(scored_candidates) * self.breeding_fraction))]
+
+            # Remove scores
+            parents = [p[0] for p in parents] 
+
+            # Shuffle parents
+            shuffle(parents)
+
+            # Separate the selected parents into pairs
+            parent_pairs = []
+            for i in range(0, len(parents)):
+                if i+1 < len(parents):
+                    parent_pairs.append((parents[i], parents[i+1]))
+                    i += 1
+
+            # Each parent pair should replace their proportion of the truncated population
+            children = []
+            num_replacements = math.ceil(1/self.breeding_fraction)
+            for parent in parent_pairs:
+                for k in range(0,2+int(math.ceil(num_replacements/2))): # Parents replace themselves + at least their proportion of the culled generation 
+                    crossovers = self.crossover(parent[0], parent[1])
+                    children.append(self.mutate(crossovers[0], self.mutation_prob))
+                    children.append(self.mutate(crossovers[1], self.mutation_prob))
+
+            # Repeat on the next generation 
+            candidates = children
+            generation_counter += 1
+
+        # Results
+        scored_candidates = []
+        for candidate in candidates:
+            fitness = self.poem_fitness(candidate)
+            scored_candidates.append((candidate, fitness))
+            
+        # Sort poems by fitness 
+        scored_candidates.sort(key=operator.itemgetter(1))
+        scored_candidates.reverse()
+        
+        # Take the fittest candidate
+        best_candidate = scored_candidates[:1]
+        print "Best candidate: "+str(best_candidate)
+
+        #TODO: Update the database
+            
+
+        # Save parse height cache
+        self.dump_parse_height_cache()
+
