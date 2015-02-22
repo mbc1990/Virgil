@@ -1,4 +1,57 @@
 
-.container {
-    max-width: 900px;
+.col-xs-5ths,
+    .col-sm-5ths,
+    .col-md-5ths,
+    .col-lg-5ths {
+position: relative;
+          min-height: 1px;
+          padding-right: 10px;
+          padding-left: 10px;
+width: 20%;
+float: left;
+    }
+
+@media (min-width: 768px) {
+    .col-sm-5ths {
+width: 20%;
+float: left;
+    }
+}
+@media (min-width: 992px) {
+    .col-md-5ths {
+width: 20%;
+float: left;
+    }
+}
+@media (min-width: 1200px) {
+    .col-lg-5ths {
+width: 20%;
+float: left;
+    }
+}
+
+.poem {
+    margin: 10px;
+    background-color: #f8f8f8;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #e7e7e7;
+    padding: 8px;
+}
+
+.meta-info-title {
+    font-size: 8px;
+}
+
+.meta-info-value {
+    text-align: center;
+    font-size: 10px;
+}
+
+.meta-data-table {
+    table-layout: fixed;
+}
+
+.poem-links {
+    text-align: center;
 }

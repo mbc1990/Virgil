@@ -6,8 +6,24 @@
         <script src="/static/js/bootstrap.min.js"></script> 
         <script src="/static/js/moment.js"></script>
         <link href="/static/css/base.css" rel="stylesheet" media="screen"> 
+        <div id="fb-root"></div>
+        <script>
+        </script>
     </head>
     <body>
+        {% macro render_field(field, label_visible=true) -%}
+            <div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
+                {% if field.type != 'HiddenField' and label_visible %}
+                    <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+                {% endif %}
+                {{ field(class_='form-control', **kwargs) }}
+                {% if field.errors %}
+                    {% for e in field.errors %}
+                        <p class="help-block">{{ e }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {%- endmacro %}
         <nav class="navbar navbar-default">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
@@ -33,7 +49,15 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
         </nav>
-        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }} </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
         <div id="content-wrapper">
             {% block content %}{% endblock %}
         </div>
