@@ -11,6 +11,7 @@ def index():
     form = PoemForm() 
     if form.validate_on_submit():  
         flash("poem added")
+
         # Create an empty poem (with a unique id)
         poem = Poem(timestamp=datetime.utcnow(),
             generations=form.generations.data,
@@ -18,7 +19,9 @@ def index():
             phonetic_similarity_weight=form.phonetic_similarity_weight.data,
             breeding_fraction=form.breeding_fraction.data,
             starting_population_size=form.starting_population_size.data,
-            lines=form.lines.data)
+            lines=form.lines.data,
+            current_generation=0)
+
         db.session.add(poem) 
 
         # Add all the input seedwords 
@@ -27,6 +30,10 @@ def index():
             seed_word = Seed_Word(word=sw, poem=poem)
             db.session.add(seed_word)
         db.session.commit()
+
+        # Add the poem to the queue
+        app.poem_queue.add_poem(poem)
+
         return redirect(url_for('index'))  
 
     # Display all poems for testing 

@@ -11,6 +11,7 @@ class Poem(db.Model):
     starting_population_size = db.Column(db.Integer)
     lines = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime)
+    current_generation = db.Column(db.Integer)
 
     seed_words = db.relationship('Seed_Word', backref='poem', lazy='dynamic')
 
