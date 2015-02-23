@@ -111,14 +111,13 @@ class Poem_Generator:
         self.poem_length = poem.lines #6 # Number of lines in a poem
         self.starting_population_size = poem.starting_population_size #50 # Number of poems the algorithm begins with 
         self.phonetic_similarity_weight = poem.phonetic_similarity_weight
-        self.seed_words = poem.seed_words.all() #['cat', 'winter'] # Input "idea"
+        self.seed_words = [w.word for w in poem.seed_words.all()] #['cat', 'winter'] # Input "idea"
         self.poem = poem #ORM object that will be updated as the poem is generated
 
     # Generates a set of synonyms from the input words 
     def generate_outline(self):
 
-        #TODO: Replace with seed words array 
-        starting_words = ['stars', 'night', 'quiet', 'clear']
+        starting_words = self.seed_words
 
         # Get synonyms for every input word 
         expanded_outline = []
