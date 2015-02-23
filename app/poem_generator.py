@@ -292,15 +292,15 @@ class Poem_Generator:
         score = ((alliteration_score*2)+phonetic_similarity_score)/parse_height_score
         return score
 
-    # Returns a string form of the poem
-    def stringify_poem(self, poem):
+    # Returns a string with <br> line breaks 
+    def poem_to_html(self, poem):
         output = ""
         for line in poem: 
             for t in line:
                 if len(output) != 0 and t not in [',', '.', '!', '\n', ';','\'', ':']:
                     output += " "
                 output += t
-            output += '\n'
+            output += '<br>'
         return output
 
 
@@ -374,12 +374,10 @@ class Poem_Generator:
         scored_candidates.sort(key=operator.itemgetter(1))
         scored_candidates.reverse()
         
-        # Take the fittest candidate
+        # Take the fittest candidate and format it for the web app
         best_candidate = scored_candidates[0]
-        best_candidate_str = self.stringify_poem(best_candidate[0])
-        print best_candidate_str
-
-        poem.text = best_candidate_str        
+        html_line_breaks = self.poem_to_html(best_candidate[0])
+        poem.text = html_line_breaks 
         db.session.add(poem)
         db.session.commit()
 
