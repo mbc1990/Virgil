@@ -103,7 +103,6 @@ class Poem_Generator:
 
     def __init__(self, poem):
         print "Poem generator init"
-        #TODO: Use the actual paramters here (do this next)
 
         self.generations = poem.generations # Number of selection-breeding processes
         self.breeding_fraction = poem.breeding_fraction # .35 # Top fraction of candidates selected to breed
@@ -339,6 +338,11 @@ class Poem_Generator:
 
             # Remove scores
             parents = [p[0] for p in parents] 
+
+            # Update database
+            poem.text = self.poem_to_html(parents[0]) 
+            db.session.add(poem)
+            db.session.commit()
 
             # Shuffle parents
             shuffle(parents)

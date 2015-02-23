@@ -1,5 +1,6 @@
 
 from app import poem_generator
+import thread
 
 MAX_CONCURRENT_POEMS = 2
 class Poem_Queue:
@@ -22,14 +23,13 @@ class Poem_Queue:
         while( (self.running_count < MAX_CONCURRENT_POEMS) and (len(self.queue) > 0)):
             poem = self.queue.pop(0)
             self.running_count += 1
-
-            #TODO: wrap in new thread 
             pg = poem_generator.Poem_Generator(poem)
-            pg.start_poem(poem)
+            thread.start_new_thread(pg.start_poem, (poem,))
+
+    def start_poem(self, poem):
+        pg = poem_generator.Poem_Generator(poem)
+        pg.start_poem(poem)
 
     def get_position(self, poem):
         #TODO: Actually keep track of position somehow for reporting to the user (either here or in the model)
         return 5
-        
-
-
