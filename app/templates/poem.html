@@ -1,18 +1,15 @@
 <div class="poem">
     <div class="row">
         <div class="col-md-12">
-            <table class="table table-bordered table-condensed meta-data-table">
-                <tr class="meta-info-title">
-                    <td>
-                       Fittest Candidate 
-                    </td>
-                </tr>
-                <tr>
-                    <td style="white-space: pre-wrap;">
-                        {{ poem.text }}
-                    </td>
-                </tr>
-            </table>
+            <div class="poem-text">
+                {% autoescape false %} 
+                    {{ poem.text }}
+                {% endautoescape %}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             <table class="table table-bordered table-condensed meta-data-table">
                 <tr class="meta-info-title">
                     <td>
