@@ -40,6 +40,12 @@ def index():
     poems = Poem.query.order_by(desc(Poem.id)).all()
     return render_template('index.html', title='Virgil', form=form, poems=poems)
 
+@app.route('/poem/<poemid>', methods=['GET', 'POST'])
+def poem(poemid):
+   poem = Poem.query.filter_by(id=poemid).first()
+   return render_template('poem.html', poem=poem)
+
+
 @app.route('/favorites')
 def favorites():
     return render_template('favorites.html')

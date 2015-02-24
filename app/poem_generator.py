@@ -341,8 +341,10 @@ class Poem_Generator:
 
             # Update database
             poem.text = self.poem_to_html(parents[0]) 
+            poem.current_generation += 1
             db.session.add(poem)
             db.session.commit()
+            print "Poem text updated to "+str(poem.text)
 
             # Shuffle parents
             shuffle(parents)

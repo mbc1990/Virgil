@@ -18,7 +18,9 @@
             </div>
             <div class="col-md-6">
                 {% for poem in poems%}
-                    {% include 'poem.html' %}
+                    <div id="poem-wrapper{{ poem.id }}">
+                        {% include 'poem.html' %}
+                    </div>
                 {% endfor %}
             </div>
         </div>

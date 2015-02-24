@@ -18,6 +18,7 @@ class Poem_Queue:
         print "Queue: "+str(self.queue)
         self.advance()
 
+    #TODO: decrement running count when poem is done 
     def advance(self):
         print "Self.queue in advance: "+str(self.queue)
         while( (self.running_count < MAX_CONCURRENT_POEMS) and (len(self.queue) > 0)):
