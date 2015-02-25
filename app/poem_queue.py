@@ -1,5 +1,6 @@
 
 from app import poem_generator
+import thread
 
 MAX_CONCURRENT_POEMS = 2
 class Poem_Queue:
@@ -11,25 +12,27 @@ class Poem_Queue:
         self.running_count = 0
 
     def add_poem(self, poem):
-        print MAX_CONCURRENT_POEMS
-        print "adding: "+str(poem)
         self.queue.append(poem)
-        print "Queue: "+str(self.queue)
         self.advance()
 
     def advance(self):
-        print "Self.queue in advance: "+str(self.queue)
         while( (self.running_count < MAX_CONCURRENT_POEMS) and (len(self.queue) > 0)):
             poem = self.queue.pop(0)
             self.running_count += 1
+            pg = poem_generator.Poem_Generator(poem, self)
+            thread.start_new_thread(pg.start_poem, (poem,))
 
-            #TODO: wrap in new thread 
-            pg = poem_generator.Poem_Generator(poem)
-            pg.start_poem(poem)
+    def start_poem(self, poem):
+        pg = poem_generator.Poem_Generator(poem)
+        pg.start_poem(poem)
+
+    def end_poem(self):
+        self.running_count -= 1
 
     def get_position(self, poem):
-        #TODO: Actually keep track of position somehow for reporting to the user (either here or in the model)
-        return 5
-        
-
-
+        pos = 0
+        for queue_poem in self.queue:
+            if poem.id == queue_poem.id:
+                return pos
+            pos += 1
+        return -1 

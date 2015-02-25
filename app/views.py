@@ -10,8 +10,6 @@ from datetime import datetime
 def index():
     form = PoemForm() 
     if form.validate_on_submit():  
-        flash("poem added")
-
         # Create an empty poem (with a unique id)
         poem = Poem(timestamp=datetime.utcnow(),
             generations=form.generations.data,
@@ -34,11 +32,27 @@ def index():
         # Add the poem to the queue
         app.poem_queue.add_poem(poem)
 
+        # Keep track of poem id 
+        session['poem_id'] = poem.id 
+
         return redirect(url_for('index'))  
 
-    # Display all poems for testing 
-    poems = Poem.query.order_by(desc(Poem.id)).all()
+    if session['poem_id']:
+        poems = [Poem.query.filter_by(id=session['poem_id']).first()]
     return render_template('index.html', title='Virgil', form=form, poems=poems)
+
+@app.route('/poem/<poemid>', methods=['GET', 'POST'])
+def poem(poemid):
+   poem = Poem.query.filter_by(id=poemid).first()
+   return render_template('poem.html', poem=poem)
+
+@app.route('/session_poem', methods=['GET', 'POST'])
+def session_poem():
+   poemid = session['poem_id']
+   print 'session poem id: '+str(poemid)
+   poem = Poem.query.filter_by(id=poemid).first()
+   return render_template('poem.html', poem=poem)
+
 
 @app.route('/favorites')
 def favorites():

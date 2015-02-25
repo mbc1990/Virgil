@@ -8,6 +8,24 @@
         <link href="/static/css/base.css" rel="stylesheet" media="screen"> 
         <div id="fb-root"></div>
         <script>
+            function addPoem(id) {
+                setInterval(function() {
+                    updatePoem(id);
+                },3000);
+            }
+            function updatePoem(id) {
+                $.post('/session_poem', {
+                    
+                }).done(function(poem) {
+                    $("#poem-wrapper"+id).html(poem);
+                }).fail(function() {
+                    console.log("Fail");
+                //    alert('fail');
+                });
+            }
+            var poemid = "{{session["poem_id"]}}";
+            addPoem(poemid);
+            console.log(poemid);
         </script>
     </head>
     <body>

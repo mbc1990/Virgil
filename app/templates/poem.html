@@ -1,4 +1,4 @@
-<div class="poem">
+<div class="poem" id="poem{{ poem.id }}">
     <div class="row">
         <div class="col-md-12">
             <div class="poem-text">
@@ -16,6 +16,9 @@
                         Generations
                     </td>
                     <td>
+                        Current Generation 
+                    </td>
+                    <td>
                         Mutation 
                     </td>
                     <td>
@@ -30,7 +33,10 @@
                 </tr>
                 <tr class="meta-info-value">
                     <td>
-                        <span >{{ poem.generations }}</span>
+                        <span>{{ poem.generations }}</span>
+                    </td>
+                    <td>
+                        <span>{{ poem.current_generation }}</span>
                     </td>
                     <td>
                         <span> {{ poem.mutation_probability }}</span>
@@ -65,7 +71,8 @@
     <div class="row">
         <div class="col-md-12">
             <div class="poem-links">
-                <a href="#">Submit to Favorites</a>
+                <a href="javascript:updatePoem('{{ poem.id }}')">Update Poem</a>
+                | <a href="#">Submit to Favorites</a>
                 | <a href="#">Share on Facebook</a>
             </div>
         </div>
