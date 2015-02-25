@@ -2,7 +2,7 @@
 from app import poem_generator
 import thread
 
-MAX_CONCURRENT_POEMS = 2
+MAX_CONCURRENT_POEMS = 10
 class Poem_Queue:
     def __init__(self):
         print "Init poem queue"
