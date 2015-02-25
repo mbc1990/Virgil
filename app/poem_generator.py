@@ -101,7 +101,7 @@ class Poem_Generator:
 
 
 
-    def __init__(self, poem):
+    def __init__(self, poem, poem_queue):
         print "Poem generator init"
 
         self.generations = poem.generations # Number of selection-breeding processes
@@ -112,11 +112,13 @@ class Poem_Generator:
         self.phonetic_similarity_weight = poem.phonetic_similarity_weight
         self.seed_words = [w.word for w in poem.seed_words.all()] #['cat', 'winter'] # Input "idea"
         self.poem = poem #ORM object that will be updated as the poem is generated
+        self.poem_queue = poem_queue 
 
     # Generates a set of synonyms from the input words 
     def generate_outline(self):
 
         starting_words = self.seed_words
+        print "Starting words: "+str(starting_words)
 
         # Get synonyms for every input word 
         expanded_outline = []
@@ -124,6 +126,8 @@ class Poem_Generator:
             synsets = wordnet.synsets(keyword)
             syn_strings = [x.name.split('.')[0] for x in synsets] # get english token from synset
             expanded_outline += syn_strings
+
+        print "Expanded outline: "+str(expanded_outline)
 
         # Clean the expanded outline 
         pruned_outline = []
@@ -133,8 +137,11 @@ class Poem_Generator:
             # Throw out any words that aren't in the markov model 
             if word in Poem_Generator.token2ngrams and word not in pruned_outline and '_' not in word:
                 pruned_outline.append(word)
-        expanded_outline = pruned_outline
-        return expanded_outline
+
+        print "Pruned outline: "+str(pruned_outline)
+
+        return pruned_outline
+        
 
     # Generates a candidate 
     def generate_candidate_line(self, keyword, n, min_length, max_length):
@@ -306,6 +313,7 @@ class Poem_Generator:
         print "Starting new poem"
         # This will eventually use WordNet to turn the 1-5 word outline into 10-50 words 
         outline = self.generate_outline()
+        print "outline: "+str(outline)
 
         # Generate starting population
         candidates = []
@@ -325,7 +333,7 @@ class Poem_Generator:
             for candidate in candidates:
                 fitness = self.poem_fitness(candidate)
                 counter += 1
-                print str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(self.generations)+' with '+str(len(Poem_Generator.height_memo))+' cached line parse heights'
+                print "Poem "+str(self.poem.id)+": "+str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(self.generations)+' with '+str(len(Poem_Generator.height_memo))+' cached line parse heights'
                 scored_candidates.append((candidate, fitness))
                 
             # Sort poems by fitness 
@@ -385,6 +393,9 @@ class Poem_Generator:
         poem.text = html_line_breaks 
         db.session.add(poem)
         db.session.commit()
+
+        # Tell the queue that a poem is complete
+        self.poem_queue.end_poem()
 
         # Save parse height cache
         self.dump_parse_height_cache()

@@ -10,7 +10,6 @@ from datetime import datetime
 def index():
     form = PoemForm() 
     if form.validate_on_submit():  
-
         # Create an empty poem (with a unique id)
         poem = Poem(timestamp=datetime.utcnow(),
             generations=form.generations.data,

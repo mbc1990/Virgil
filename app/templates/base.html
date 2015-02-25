@@ -19,7 +19,8 @@
                 }).done(function(poem) {
                     $("#poem-wrapper"+id).html(poem);
                 }).fail(function() {
-                    alert('fail');
+                    console.log("Fail");
+                //    alert('fail');
                 });
             }
             var poemid = "{{session["poem_id"]}}";
