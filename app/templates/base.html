@@ -8,24 +8,22 @@
         <link href="/static/css/base.css" rel="stylesheet" media="screen"> 
         <div id="fb-root"></div>
         <script>
-            function addPoem(id) {
-                setInterval(function() {
-                    updatePoem(id);
-                },3000);
-            }
-            function updatePoem(id) {
+            function pollForPoem(id) {
+                console.log("polling poem");
                 $.post('/session_poem', {
                     
                 }).done(function(poem) {
+                    setTimeout(function() {
+                        pollForPoem(id); 
+                    }, 3000);
                     $("#poem-wrapper"+id).html(poem);
                 }).fail(function() {
                     console.log("Fail");
-                //    alert('fail');
                 });
             }
+
             var poemid = "{{session["poem_id"]}}";
-            addPoem(poemid);
-            console.log(poemid);
+            pollForPoem(poemid);
         </script>
     </head>
     <body>
@@ -62,7 +60,7 @@
                     <li><a href="{{ url_for('favorites') }}">Favorites</a></li> 
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="active"><a href="#">Queue Position<span class="sr-only"></span></a></li>
+                    Queue Position {{ queue_position }}
                 </ul>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->

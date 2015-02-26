@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, session, flash
-from app import app, db
+from app import app, db, poem_queue
 from forms import PoemForm
 from models import Poem, Seed_Word
 from sqlalchemy import desc
@@ -38,8 +38,10 @@ def index():
         return redirect(url_for('index'))  
 
     if session['poem_id']:
-        poems = [Poem.query.filter_by(id=session['poem_id']).first()]
-    return render_template('index.html', title='Virgil', form=form, poems=poems)
+        poem = Poem.query.filter_by(id=session['poem_id']).first()
+        queue_position = app.poem_queue.get_position(poem)
+        poems = [poem]
+    return render_template('index.html', title='Virgil', form=form, poems=poems, queue_position=queue_position)
 
 @app.route('/poem/<poemid>', methods=['GET', 'POST'])
 def poem(poemid):
