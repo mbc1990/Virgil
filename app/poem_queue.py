@@ -4,6 +4,7 @@ import thread
 
 MAX_CONCURRENT_POEMS = 2
 class Poem_Queue:
+
     def __init__(self):
         print "Init poem queue"
         # call static method on virgil code that runs preprocessing etc. with config options 
@@ -11,12 +12,20 @@ class Poem_Queue:
         self.queue = [];
         self.running_count = 0
 
+    def get_position(self, poem):
+        pos = 0
+        for queue_poem in self.queue:
+            if poem.id == queue_poem.id:
+                return pos
+            pos += 1
+        return -1 
+
     def add_poem(self, poem):
         self.queue.append(poem)
         self.advance()
 
     def advance(self):
-        while( (self.running_count < MAX_CONCURRENT_POEMS) and (len(self.queue) > 0)):
+        while self.running_count < MAX_CONCURRENT_POEMS and len(self.queue) > 0:
             poem = self.queue.pop(0)
             self.running_count += 1
             pg = poem_generator.Poem_Generator(poem, self)
@@ -29,10 +38,3 @@ class Poem_Queue:
     def end_poem(self):
         self.running_count -= 1
 
-    def get_position(self, poem):
-        pos = 0
-        for queue_poem in self.queue:
-            if poem.id == queue_poem.id:
-                return pos
-            pos += 1
-        return -1 
