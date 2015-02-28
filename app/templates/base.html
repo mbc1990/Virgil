@@ -76,10 +76,8 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('index') }}">Create</a></li> 
-                    <li><a href="{{ url_for('favorites') }}">Favorites</a></li> 
                 </ul>
-                <ul class="nav navbar-nav navbar-right" id="queue-position">
+                <ul class="nav navbar-nav" id="queue-position">
                     {% if (queue_position > 0) %}
                         <li><a>Queue Position: {{ queue_position }}</a></li>
                     {% endif %}
