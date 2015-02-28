@@ -14,7 +14,8 @@ def index():
         poem = Poem(timestamp=datetime.utcnow(),
             generations=form.generations.data,
             mutation_probability=form.mutation_probability.data,
-            phonetic_similarity_weight=form.phonetic_similarity_weight.data,
+            #phonetic_similarity_weight=form.phonetic_similarity_weight.data,
+            phonetic_similarity_weight=1.0,
             breeding_fraction=form.breeding_fraction.data,
             starting_population_size=form.starting_population_size.data,
             lines=form.lines.data,
@@ -64,6 +65,6 @@ def queue_position():
     position = app.poem_queue.get_position(poem)
     return str(position)
 
-@app.route('/favorites')
-def favorites():
-    return render_template('favorites.html')
+#@app.route('/favorites')
+#def favorites():
+    #return render_template('favorites.html')
