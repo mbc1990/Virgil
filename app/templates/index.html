@@ -5,13 +5,13 @@
             <div class="col-md-6">
                 <form action="" class="form-horizontal {% if form.errors.poem%} error{% endif %}" method="post" name="poem">
                     {{ form.hidden_tag() }}
-                    {{ render_field(form.seed_words, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.generations, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.mutation_probability, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.phonetic_similarity_weight, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.breeding_fraction, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.starting_population_size, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.lines, label_visible=True, placeholder='',type='text') }}
+                    {{ render_field(form.seed_words,label_visible=True, label="Seed Words",) }}
+                    {{ render_field(form.generations, label_visible=True, label="Generations") }}
+                    {{ render_field(form.mutation_probability, label_visible=True, label="Mutation Probability") }}
+                    {{ render_field(form.phonetic_similarity_weight, label_visible=True, label="Phonetic Similarity" ) }}
+                    {{ render_field(form.breeding_fraction, label_visible=True, label="Selection Fraction") }}
+                    {{ render_field(form.starting_population_size, label_visible=True, label="Starting Population Size") }}
+                    {{ render_field(form.lines, label_visible=True, label="Number of Lines") }}
                     <p><input class="btn btn-primary" type="submit" value="Generate!"></p>
                 </form>
 

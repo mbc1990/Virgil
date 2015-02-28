@@ -46,10 +46,10 @@
         </script>
     </head>
     <body>
-        {% macro render_field(field, label_visible=true) -%}
+        {% macro render_field(field, label_visible=true, label) -%}
             <div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
                 {% if field.type != 'HiddenField' and label_visible %}
-                    <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+                    <label for="{{ field.id }}" class="control-label">{{ label }}</label>
                 {% endif %}
                 {{ field(class_='form-control', **kwargs) }}
                 {% if field.errors %}
