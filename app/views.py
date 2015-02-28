@@ -24,7 +24,8 @@ def index():
         db.session.commit()
 
         # Add all the input seedwords 
-        seed_word_split = form.seed_words.data.split(',')
+        seed_words = form.seed_words.data.replace(', ',',')
+        seed_word_split = seed_words.split(',')
         for sw  in seed_word_split:
             seed_word = Seed_Word(word=sw, poem=poem)
             db.session.add(seed_word)
