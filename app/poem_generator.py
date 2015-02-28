@@ -13,6 +13,7 @@ import operator
 import math
 from random import shuffle
 from stat_parser import Parser
+from models import Poem 
 from app import db
 parser = Parser()
 
@@ -90,7 +91,7 @@ class Poem_Generator:
 
 
     @staticmethod
-    def initialize(config):
+    def initialize():
         print "Static generator methods initialized!"
         Poem_Generator.load_parse_height_cache()
         tokens = Poem_Generator.get_tokens()
@@ -111,8 +112,9 @@ class Poem_Generator:
         self.starting_population_size = poem.starting_population_size #50 # Number of poems the algorithm begins with 
         self.phonetic_similarity_weight = poem.phonetic_similarity_weight
         self.seed_words = [w.word for w in poem.seed_words.all()] #['cat', 'winter'] # Input "idea"
-        self.poem = poem #ORM object that will be updated as the poem is generated
+        print "Generator initialized with: "+str(self.seed_words)
         self.poem_queue = poem_queue 
+        
 
     # Generates a set of synonyms from the input words 
     def generate_outline(self):
@@ -290,9 +292,9 @@ class Poem_Generator:
         parse_height_score = self.line_pair_parse_height(poem)
         phonetic_similarity_score = self.phonetic_similarity(poem)
         
-        print 'Alliteration: '+str(alliteration_score)
-        print 'Parse height: '+str(parse_height_score)
-        print 'Phon similar: '+str(phonetic_similarity_score)
+        #print 'Alliteration: '+str(alliteration_score)
+        #print 'Parse height: '+str(parse_height_score)
+        #print 'Phon similar: '+str(phonetic_similarity_score)
 
         score = ((alliteration_score*2)+phonetic_similarity_score)/parse_height_score
         return score
@@ -333,7 +335,8 @@ class Poem_Generator:
             for candidate in candidates:
                 fitness = self.poem_fitness(candidate)
                 counter += 1
-                print "Poem "+str(self.poem.id)+": "+str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(self.generations)+' with '+str(len(Poem_Generator.height_memo))+' cached line parse heights'
+                if counter % 10 == 0:
+                    print "Poem "+str(poem.id)+": "+str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(self.generations)+' with '+str(len(Poem_Generator.height_memo))+' cached line parse heights'
                 scored_candidates.append((candidate, fitness))
                 
             # Sort poems by fitness 
@@ -347,10 +350,13 @@ class Poem_Generator:
             # Remove scores
             parents = [p[0] for p in parents] 
 
+            poem = Poem.query.filter_by(id=poem.id).first()
             # Update database
             poem.text = self.poem_to_html(parents[0]) 
             poem.current_generation += 1
-            db.session.add(poem)
+            # With both of these lines, it crashes here and does not write to the database
+
+            db.session.add(poem) # Without this line, the error occurs on the db.session.add() line below
             db.session.commit()
             print "Poem text updated to "+str(poem.text)
 
@@ -391,11 +397,12 @@ class Poem_Generator:
         best_candidate = scored_candidates[0]
         html_line_breaks = self.poem_to_html(best_candidate[0])
         poem.text = html_line_breaks 
+
         db.session.add(poem)
         db.session.commit()
 
         # Tell the queue that a poem is complete
-        self.poem_queue.end_poem()
+        self.poem_queue.end_poem(poem)
 
         # Save parse height cache
         self.dump_parse_height_cache()

@@ -9,7 +9,7 @@
         <div id="fb-root"></div>
         <script>
             function pollForPoem(id) {
-                console.log("polling poem");
+                console.log("polling for poem "+id);
                 $.post('/session_poem', {
                     
                 }).done(function(poem) {
@@ -22,8 +22,27 @@
                 });
             }
 
+            function pollForQueuePosition(id) {
+                console.log("polling for queue position");
+                $.post('/queue_position', {
+                    
+                }).done(function(position) {
+                    setTimeout(function() {
+                        pollForQueuePosition(id); 
+                    }, 3000);
+                    var text = "<li><a>Being Made!</a></li>";
+                    if(position == -1) text = "<li><a>Not In Queue</a></li>";
+                    if(position > 0) text = "<li><a>Queue Position: "+position+"</a></li>";
+                    $("#queue-position").html(text);
+                    console.log("Queue position: "+position);
+                }).fail(function() {
+                    console.log("queue Fail");
+                });
+            }
+
             var poemid = "{{session["poem_id"]}}";
             pollForPoem(poemid);
+            pollForQueuePosition(poemid);
         </script>
     </head>
     <body>
@@ -59,8 +78,16 @@
                     <li><a href="{{ url_for('index') }}">Create</a></li> 
                     <li><a href="{{ url_for('favorites') }}">Favorites</a></li> 
                 </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    Queue Position {{ queue_position }}
+                <ul class="nav navbar-nav navbar-right" id="queue-position">
+                    {% if (queue_position > 0) %}
+                        <li><a>Queue Position: {{ queue_position }}</a></li>
+                    {% endif %}
+                    {% if (queue_position == 0) %}
+                        <li><a>Being Made!</a></li>
+                    {% endif %}
+                    {% if (queue_position == -1) %}
+                        <li><a>Not In Queue</a></li>
+                    {% endif %}
                 </ul>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->

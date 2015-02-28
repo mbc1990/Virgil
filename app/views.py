@@ -21,19 +21,21 @@ def index():
             current_generation=0)
 
         db.session.add(poem) 
+        db.session.commit()
 
         # Add all the input seedwords 
         seed_word_split = form.seed_words.data.split(',')
         for sw  in seed_word_split:
             seed_word = Seed_Word(word=sw, poem=poem)
             db.session.add(seed_word)
-        db.session.commit()
+            db.session.commit()
 
         # Add the poem to the queue
         app.poem_queue.add_poem(poem)
 
         # Keep track of poem id 
         session['poem_id'] = poem.id 
+        print "Poem "+str(poem.id)+" added"
 
         return redirect(url_for('index'))  
 
@@ -55,6 +57,11 @@ def session_poem():
    poem = Poem.query.filter_by(id=poemid).first()
    return render_template('poem.html', poem=poem)
 
+@app.route('/queue_position', methods=['GET', 'POST'])
+def queue_position():
+    poem = Poem.query.filter_by(id=session['poem_id']).first()
+    position = app.poem_queue.get_position(poem)
+    return str(position)
 
 @app.route('/favorites')
 def favorites():
