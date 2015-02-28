@@ -5,13 +5,13 @@
             <div class="col-md-6">
                 <form action="" class="form-horizontal {% if form.errors.poem%} error{% endif %}" method="post" name="poem">
                     {{ form.hidden_tag() }}
-                    {{ render_field(form.seed_words, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.generations, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.mutation_probability, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.phonetic_similarity_weight, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.breeding_fraction, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.starting_population_size, label_visible=True, placeholder='',type='text') }}
-                    {{ render_field(form.lines, label_visible=True, placeholder='',type='text') }}
+                    {{ render_field(form.seed_words,label_visible=True, label="Seed Words", explanation="1 to 5 words to inspire the poem") }}
+                    {{ render_field(form.generations, label_visible=True, label="Generations", explanation="Number of selection-reproduction cycles (between 2 and 6)") }}
+                    {{ render_field(form.mutation_probability, label_visible=True, label="Mutation Probability", explanation="Probability of a word-swap mutation (between 0.0 and 1.0)") }}
+                    {{ render_field(form.phonetic_similarity_weight, label_visible=True, label="Phonetic Similarity" ) }}
+                    {{ render_field(form.breeding_fraction, label_visible=True, label="Selection Fraction", explanation="Fittest fraction chosen for reproduction (between 0.05 and 1.0)") }}
+                    {{ render_field(form.starting_population_size, label_visible=True, label="Population Size", explanation="Number of poems (between 10 and 1000)") }}
+                    {{ render_field(form.lines, label_visible=True, label="Number of Lines", explanation="Size of generated poems (between 2 and 8)") }}
                     <p><input class="btn btn-primary" type="submit" value="Generate!"></p>
                 </form>
 

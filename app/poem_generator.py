@@ -100,7 +100,14 @@ class Poem_Generator:
         print("building model 2")
         Poem_Generator.build_markov_model(tokens, 2)
 
-
+    # Checks that the input seed words are in the corpus 
+    @staticmethod
+    def validate_input(seed_words):
+        not_allowed = []
+        for word in seed_words:
+            if word not in Poem_Generator.token2ngrams:
+                not_allowed.append(word)
+        return not_allowed
 
     def __init__(self, poem, poem_queue):
         print "Poem generator init"

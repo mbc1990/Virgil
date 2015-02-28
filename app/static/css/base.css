@@ -65,3 +65,8 @@ float: left;
     padding: 8px;
     font-family: calibri;
 }
+
+.input-explanation {
+    font-style: italic;    
+    font-size: 12px;
+}
