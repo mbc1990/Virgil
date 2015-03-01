@@ -19,7 +19,8 @@ def index():
             breeding_fraction=form.breeding_fraction.data,
             starting_population_size=form.starting_population_size.data,
             lines=form.lines.data,
-            current_generation=0)
+            current_generation=0,
+            progress=0)
 
         db.session.add(poem) 
         db.session.commit()
@@ -49,6 +50,14 @@ def index():
         poems = [poem]
 
     return render_template('index.html', title='Virgil', form=form, poems=poems, queue_position=queue_position)
+
+@app.route('/about', methods=['GET'])
+def about():
+    queue_position = -1
+    if 'poem_id' in session:
+        poem = Poem.query.filter_by(id=session['poem_id']).first()
+        queue_position = app.poem_queue.get_position(poem)
+    return render_template('about.html', title='Virgil - About', queue_position=queue_position) 
 
 
 @app.route('/poem/<poemid>', methods=['GET', 'POST'])

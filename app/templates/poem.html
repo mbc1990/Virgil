@@ -1,6 +1,19 @@
 <div class="poem" id="poem{{ poem.id }}">
     <div class="row">
         <div class="col-md-12">
+            {% if poem.current_generation <= poem.generations %}
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:{{ poem.progress }}%">
+                        {% if poem.current_generation+1 <= poem.generations %}
+                            Gen. {{ poem.current_generation+1 }}/{{ poem.generations }}... 
+                        {% endif %}
+                        {% if poem.current_generation+1 > poem.generations %}
+                            Finishing Up...
+                        {% endif %}
+
+                    </div>
+                </div>
+            {% endif %}
             <div class="poem-text">
                 {% autoescape false %} 
                     {{ poem.text }}

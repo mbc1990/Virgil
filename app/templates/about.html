@@ -1,0 +1,21 @@
+
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <p class="about-text">
+                    Virgil is a program that generates "poetry". It uses a Markov chain to generate potential lines, which are then organized into a population of poems. That population is selected, crossed over, and mutated.
+                </p>
+                <p class="about-text">
+                    The process involves running a computationally expensive fitness function on each member of the poem population, each generation. For this reason, requests are processed in a queue. After clicking the "Generate!" button, you can see your queue position in the navigation bar. Using larger numbers for population size and generations can take as long as 10 minutes.
+                </p>
+                <p class="about-text">
+                    This is also a work in progress. Sorry if anything breaks.
+                </p>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+    </div>
+{% endblock %}
