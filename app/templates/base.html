@@ -8,24 +8,33 @@
         <link href="/static/css/base.css" rel="stylesheet" media="screen"> 
         <div id="fb-root"></div>
         <script>
+            var doPoll = true;
             function pollForPoem(id) {
-                console.log("polling for poem "+id);
-                $.post('/session_poem', {
-                    
-                }).done(function(poem) {
-                    setTimeout(function() {
-                        pollForPoem(id); 
-                    }, 3000);
-                    $("#poem-wrapper"+id).html(poem);
-                }).fail(function() {
-                    console.log("Fail");
-                });
+                if(doPoll) {
+                    console.log("polling for poem "+id);
+                    $.post('/session_poem', {
+                        
+                    }).done(function(poem) {
+                        //TODO: Smarter polling, stop when poem is done 
+                        setTimeout(function() {
+                            pollForPoem(id); 
+                        }, 3000);
+                        $("#poem-wrapper"+id).html(poem);
+                        // var generation = $(poem).findAll('
+                    }).fail(function() {
+                        console.log("Fail");
+                    });
+                }
+            }
+
+            function stopPolling() {
+                doPoll = false;
             }
 
             function pollForQueuePosition(id) {
                 console.log("polling for queue position");
                 $.post('/queue_position', {
-                    
+
                 }).done(function(position) {
                     setTimeout(function() {
                         pollForQueuePosition(id); 
