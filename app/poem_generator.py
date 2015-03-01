@@ -404,7 +404,7 @@ class Poem_Generator:
         best_candidate = scored_candidates[0]
         html_line_breaks = self.poem_to_html(best_candidate[0])
         poem.text = html_line_breaks 
-
+        poem.current_generation += 1
         db.session.add(poem)
         db.session.commit()
 
