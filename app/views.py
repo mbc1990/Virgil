@@ -71,6 +71,7 @@ def session_poem():
    print 'session poem id: '+str(poemid)
    poem = Poem.query.filter_by(id=poemid).first()
    return render_template('poem.html', poem=poem)
+   #return '{current_generation:'+str(poem.current_generation)+', poem:"'+render_template('poem.html', poem=poem)+'"}'
 
 @app.route('/queue_position', methods=['GET', 'POST'])
 def queue_position():

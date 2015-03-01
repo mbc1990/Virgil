@@ -10,7 +10,6 @@
                         {% if poem.current_generation+1 > poem.generations %}
                             Finishing Up...
                         {% endif %}
-
                     </div>
                 </div>
             {% endif %}
@@ -49,6 +48,9 @@
                         <span>
                             {% if poem.current_generation > poem.generations %}
                                 Final
+                                <script>
+                                    stopPolling();
+                                </script>
                             {% endif %}
                             {% if poem.current_generation <=  poem.generations %}
                                 {{ poem.current_generation }}
