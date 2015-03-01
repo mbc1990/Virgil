@@ -9,7 +9,6 @@
         <div id="fb-root"></div>
         <script>
             var doPoll = true;
-            //TODO: nav button backgrounds  
             function pollForPoem(id) {
                 if(doPoll) {
                     console.log("polling for poem "+id);
@@ -102,10 +101,10 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a class="page-navigation-button" href="{{ url_for('index') }}">Create</a></li>  
+                    <li class="{{ cb_class }}"><a class="page-navigation-button" href="{{ url_for('index') }}">Create</a></li>  
                 </ul>
                 <ul class="nav navbar-nav">
-                    <li><a class="page-navigation-button" href="{{ url_for('about') }}">About</a></li>  
+                    <li class="{{ ab_class }}"><a class="page-navigation-button" href="{{ url_for('about') }}">About</a></li>  
                 </ul>
                 <ul class="nav navbar-right navbar-nav {{ qp_class }}" id="queue-position">
                     {% if (queue_position > 0) %}

@@ -56,7 +56,7 @@ def index():
     elif queue_position < 0:
         qp_class = "qp-none"
 
-    return render_template('index.html', title='Virgil', form=form, poems=poems, queue_position=queue_position, qp_class=qp_class)
+    return render_template('index.html', title='Virgil', form=form, poems=poems, queue_position=queue_position, qp_class=qp_class, cb_class="active")
 
 @app.route('/about', methods=['GET'])
 def about():
@@ -78,7 +78,7 @@ def about():
     elif queue_position < 0:
         qp_class = "qp-none"
 
-    return render_template('about.html', title='Virgil - About', queue_position=queue_position, qp_class=qp_class) 
+    return render_template('about.html', title='Virgil - About', queue_position=queue_position, qp_class=qp_class, ab_class="active") 
 
 
 @app.route('/poem/<poemid>', methods=['GET', 'POST'])
