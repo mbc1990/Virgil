@@ -395,11 +395,21 @@ class Poem_Generator:
             candidates = children
             generation_counter += 1
 
+        poem.progress = 0
+        db.session.add(poem)
+        db.session.commit()
+
         # Results
         scored_candidates = []
+        scored_count = 0
         for candidate in candidates:
+            if scored_count % 5 == 0:
+                poem.progress = float(scored_count) / float(len(candidates)) * 100
+                db.session.add(poem)
+                db.session.commit()
             fitness = self.poem_fitness(candidate)
             scored_candidates.append((candidate, fitness))
+            scored_count += 1
             
         # Sort poems by fitness 
         scored_candidates.sort(key=operator.itemgetter(1))
