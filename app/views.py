@@ -48,8 +48,15 @@ def index():
         poem = Poem.query.filter_by(id=session['poem_id']).first()
         queue_position = app.poem_queue.get_position(poem)
         poems = [poem]
+    
+    # Correct class for queue position 
+    qp_class = "qp-waiting"
+    if queue_position == 0:
+        qp_class = "qp-current"
+    elif queue_position < 0:
+        qp_class = "qp-none"
 
-    return render_template('index.html', title='Virgil', form=form, poems=poems, queue_position=queue_position)
+    return render_template('index.html', title='Virgil', form=form, poems=poems, queue_position=queue_position, qp_class=qp_class)
 
 @app.route('/about', methods=['GET'])
 def about():
@@ -57,7 +64,21 @@ def about():
     if 'poem_id' in session:
         poem = Poem.query.filter_by(id=session['poem_id']).first()
         queue_position = app.poem_queue.get_position(poem)
-    return render_template('about.html', title='Virgil - About', queue_position=queue_position) 
+    queue_position = -1
+
+    if 'poem_id' in session:
+        poem = Poem.query.filter_by(id=session['poem_id']).first()
+        queue_position = app.poem_queue.get_position(poem)
+        poems = [poem]
+
+    # Correct class for queue position 
+    qp_class = "qp-waiting"
+    if queue_position == 0:
+        qp_class = "qp-current"
+    elif queue_position < 0:
+        qp_class = "qp-none"
+
+    return render_template('about.html', title='Virgil - About', queue_position=queue_position, qp_class=qp_class) 
 
 
 @app.route('/poem/<poemid>', methods=['GET', 'POST'])

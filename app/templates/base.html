@@ -10,7 +10,6 @@
         <script>
             var doPoll = true;
             //TODO: nav button backgrounds  
-            //TODO: border radius on form inputs
             function pollForPoem(id) {
                 if(doPoll) {
                     console.log("polling for poem "+id);
@@ -70,7 +69,6 @@
             var poemid = "{{session["poem_id"]}}";
             pollForPoem(poemid);
             pollForQueuePosition(poemid);
-
         </script>
     </head>
     <body>
@@ -109,7 +107,7 @@
                 <ul class="nav navbar-nav">
                     <li><a class="page-navigation-button" href="{{ url_for('about') }}">About</a></li>  
                 </ul>
-                <ul class="nav navbar-nav" id="queue-position">
+                <ul class="nav navbar-right navbar-nav {{ qp_class }}" id="queue-position">
                     {% if (queue_position > 0) %}
                         <li><a>Queue Position: {{ queue_position }}</a></li>
                     {% endif %}
