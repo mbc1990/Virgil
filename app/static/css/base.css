@@ -37,6 +37,7 @@ float: left;
     border-style: solid;
     border-color: #e7e7e7;
     padding: 8px;
+    border-radius: 1px;
 }
 
 .meta-info-title {
@@ -57,6 +58,7 @@ float: left;
 }
 
 .poem-text {
+    border-radius: 1px;
     background-color: white;
     margin-bottom: 10px;
     border-width: 1px;
@@ -85,4 +87,8 @@ float: left;
 
 .qp-none {
     background-color: #EBD5C5;
+}
+
+.form-control {
+    border-radius: 1px;
 }
