@@ -26,13 +26,16 @@ class Poem_Generator:
     # Load parse height cache
     @staticmethod 
     def load_parse_height_cache():
-        if os.path.isfile('parse_height_cache.json'):
-            with open('parse_height_cache.json', 'r') as fp:
-                height_cache_saved = json.load(fp)
-                for key in height_cache_saved['key_map'].keys():
-                    tup_key = tuple(height_cache_saved['key_map'][key])
-                    height_value = height_cache_saved['saved_cache'][key]
-                    Poem_Generator.height_memo[tup_key] = height_value
+        try:
+            if os.path.isfile('parse_height_cache.json'):
+                with open('parse_height_cache.json', 'r') as fp:
+                    height_cache_saved = json.load(fp)
+                    for key in height_cache_saved['key_map'].keys():
+                        tup_key = tuple(height_cache_saved['key_map'][key])
+                        height_value = height_cache_saved['saved_cache'][key]
+                        Poem_Generator.height_memo[tup_key] = height_value
+        except: #TODO: Rewrite the parse height cache to use a database table 
+            pass 
 
     # Save the updated height cache
     @staticmethod
@@ -317,6 +320,13 @@ class Poem_Generator:
             output += '<br>'
         return output
 
+
+    def start_poem_safe(self, poem):
+        try:
+            self.start_poem(poem)
+        except:
+            print "Exception in poem generator, throwing away poem"
+            self.poem_queue.end_poem(poem)
 
     def start_poem(self, poem):
         print "Starting new poem"

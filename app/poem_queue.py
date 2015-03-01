@@ -43,11 +43,7 @@ class Poem_Queue:
             self.running.append(poem)
             print "Starting poem "+str(poem.id)+" with seed words: "+str(poem.seed_words.all())
             pg = poem_generator.Poem_Generator(poem, self)
-            thread.start_new_thread(pg.start_poem, (poem,))
-
-    def start_poem(self, poem):
-        pg = poem_generator.Poem_Generator(poem)
-        pg.start_poem(poem)
+            thread.start_new_thread(pg.start_poem_safe, (poem,))
 
     def end_poem(self, poem):
         print "Removing poem "+str(poem.id)+" from queue"
@@ -56,4 +52,3 @@ class Poem_Queue:
         self.running = [s for s in self.running if s.id != poem.id] 
         print self.running
         self.advance()
-
