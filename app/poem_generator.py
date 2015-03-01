@@ -18,7 +18,6 @@ from app import db
 parser = Parser()
 
 class Poem_Generator:
-    #TODO: Deal with parse_height_cache
 
     ngram2following_tokens = {} # tuple of ngram -> list of tokens that follow it in the corpus (used in markov chain) 
     token2ngrams = {} # token -> ngrams it is a member of
@@ -27,13 +26,16 @@ class Poem_Generator:
     # Load parse height cache
     @staticmethod 
     def load_parse_height_cache():
-        if os.path.isfile('parse_height_cache.json'):
-            with open('parse_height_cache.json', 'r') as fp:
-                height_cache_saved = json.load(fp)
-                for key in height_cache_saved['key_map'].keys():
-                    tup_key = tuple(height_cache_saved['key_map'][key])
-                    height_value = height_cache_saved['saved_cache'][key]
-                    Poem_Generator.height_memo[tup_key] = height_value
+        try:
+            if os.path.isfile('parse_height_cache.json'):
+                with open('parse_height_cache.json', 'r') as fp:
+                    height_cache_saved = json.load(fp)
+                    for key in height_cache_saved['key_map'].keys():
+                        tup_key = tuple(height_cache_saved['key_map'][key])
+                        height_value = height_cache_saved['saved_cache'][key]
+                        Poem_Generator.height_memo[tup_key] = height_value
+        except: #TODO: Rewrite the parse height cache to use a database table 
+            pass 
 
     # Save the updated height cache
     @staticmethod
