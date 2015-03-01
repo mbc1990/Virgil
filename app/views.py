@@ -41,11 +41,15 @@ def index():
 
         return redirect(url_for('index'))  
 
-    if session['poem_id']:
+    poems = []
+    queue_position = -1
+    if 'poem_id' in session:
         poem = Poem.query.filter_by(id=session['poem_id']).first()
         queue_position = app.poem_queue.get_position(poem)
         poems = [poem]
+
     return render_template('index.html', title='Virgil', form=form, poems=poems, queue_position=queue_position)
+
 
 @app.route('/poem/<poemid>', methods=['GET', 'POST'])
 def poem(poemid):
