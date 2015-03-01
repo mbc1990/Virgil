@@ -18,6 +18,7 @@ from app import db
 parser = Parser()
 
 class Poem_Generator:
+    #TODO: Deal with parse_height_cache
 
     ngram2following_tokens = {} # tuple of ngram -> list of tokens that follow it in the corpus (used in markov chain) 
     token2ngrams = {} # token -> ngrams it is a member of
@@ -317,6 +318,13 @@ class Poem_Generator:
             output += '<br>'
         return output
 
+
+    def start_poem_safe(self, poem):
+        try:
+            self.start_poem(poem)
+        except:
+            print "Exception in poem generator, throwing away poem"
+            self.poem_queue.end_poem(poem)
 
     def start_poem(self, poem):
         print "Starting new poem"
