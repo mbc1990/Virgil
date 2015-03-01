@@ -3,12 +3,12 @@
     .col-sm-5ths,
     .col-md-5ths,
     .col-lg-5ths {
-position: relative;
-          min-height: 1px;
-          padding-right: 10px;
-          padding-left: 10px;
-width: 20%;
-float: left;
+        position: relative;
+        min-height: 1px;
+        padding-right: 10px;
+        padding-left: 10px;
+        width: 20%;
+        float: left;
     }
 
 @media (min-width: 768px) {
@@ -37,6 +37,7 @@ float: left;
     border-style: solid;
     border-color: #e7e7e7;
     padding: 8px;
+    border-radius: 1px;
 }
 
 .meta-info-title {
@@ -57,6 +58,7 @@ float: left;
 }
 
 .poem-text {
+    border-radius: 1px;
     background-color: white;
     margin-bottom: 10px;
     border-width: 1px;
@@ -73,4 +75,20 @@ float: left;
 
 .about-text {
     font-size: 20px;
+}
+
+.qp-current {
+    background-color: #C5EBC6;
+}
+
+.qp-waiting {
+    background-color: #FBFFB3;
+}
+
+.qp-none {
+    background-color: #EBD5C5;
+}
+
+.form-control {
+    border-radius: 1px;
 }
