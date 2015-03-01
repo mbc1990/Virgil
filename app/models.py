@@ -12,6 +12,7 @@ class Poem(db.Model):
     lines = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime)
     current_generation = db.Column(db.Integer)
+    progress = db.Column(db.Integer) # % progress 
 
     seed_words = db.relationship('Seed_Word', backref='poem', lazy='dynamic')
 

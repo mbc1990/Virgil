@@ -339,10 +339,14 @@ class Poem_Generator:
             # Get a fitness score for each poem 
             scored_candidates = []
             counter = 0
+            poem = Poem.query.filter_by(id=poem.id).first()
             for candidate in candidates:
                 fitness = self.poem_fitness(candidate)
                 counter += 1
-                if counter % 10 == 0:
+                if counter % 5 == 0:
+                    poem.progress = float(counter)/float(len(candidates)) * 100
+                    db.session.add(poem) # Without this line, the error occurs on the db.session.add() line below
+                    db.session.commit()
                     print "Poem "+str(poem.id)+": "+str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(self.generations)+' with '+str(len(Poem_Generator.height_memo))+' cached line parse heights'
                 scored_candidates.append((candidate, fitness))
                 
@@ -360,9 +364,10 @@ class Poem_Generator:
             poem = Poem.query.filter_by(id=poem.id).first()
             # Update database
             poem.text = self.poem_to_html(parents[0]) 
+            poem.progress = 100
             poem.current_generation += 1
             # With both of these lines, it crashes here and does not write to the database
-
+            
             db.session.add(poem) # Without this line, the error occurs on the db.session.add() line below
             db.session.commit()
             print "Poem text updated to "+str(poem.text)

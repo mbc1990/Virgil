@@ -70,3 +70,7 @@ float: left;
     font-style: italic;    
     font-size: 12px;
 }
+
+.about-text {
+    font-size: 20px;
+}
