@@ -33,7 +33,14 @@
                         <span>{{ poem.generations }}</span>
                     </td>
                     <td>
-                        <span>{{ poem.current_generation }}</span>
+                        <span>
+                            {% if poem.current_generation > poem.generations %}
+                                Final
+                            {% endif %}
+                            {% if poem.current_generation <=  poem.generations %}
+                                {{ poem.current_generation }}
+                            {% endif %}
+                        </span>
                     </td>
                     <td>
                         <span> {{ poem.mutation_probability }}</span>
