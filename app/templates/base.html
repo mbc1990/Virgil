@@ -9,18 +9,20 @@
         <div id="fb-root"></div>
         <script>
             var doPoll = true;
+            //TODO: nav button backgrounds  
+            //TODO: border radius on form inputs
+            //TODO: border radius on loading bar
+            //TODO: animations or colors when queue status changes 
             function pollForPoem(id) {
                 if(doPoll) {
                     console.log("polling for poem "+id);
                     $.post('/session_poem', {
                         
                     }).done(function(poem) {
-                        //TODO: Smarter polling, stop when poem is done 
                         setTimeout(function() {
                             pollForPoem(id); 
                         }, 3000);
                         $("#poem-wrapper"+id).html(poem);
-                        // var generation = $(poem).findAll('
                     }).fail(function() {
                         console.log("Fail");
                     });
@@ -31,6 +33,12 @@
                 doPoll = false;
             }
 
+            function clearQueueColors() {
+                $('#queue-position').removeClass('qp-waiting');
+                $('#queue-position').removeClass('qp-none');
+                $('#queue-position').removeClass('qp-current');
+            }
+
             function pollForQueuePosition(id) {
                 console.log("polling for queue position");
                 $.post('/queue_position', {
@@ -38,10 +46,22 @@
                 }).done(function(position) {
                     setTimeout(function() {
                         pollForQueuePosition(id); 
-                    }, 3000);
+                    }, 5000);
+
                     var text = "<li><a>Being Made!</a></li>";
-                    if(position == -1) text = "<li><a>Not In Queue</a></li>";
-                    if(position > 0) text = "<li><a>Queue Position: "+position+"</a></li>";
+                    if(position == -1) {
+                        text = "<li><a>Not In Queue</a></li>";
+                        clearQueueColors();
+                        $('#queue-position').addClass('qp-none');
+                    } else if(position > 0) {
+                        text = "<li><a>Queue Position: "+position+"</a></li>";
+                        clearQueueColors();
+                        $('#queue-position').addClass('qp-waiting');
+                    } else if(position == 0) {
+                        clearQueueColors();
+                        $('#queue-position').addClass('qp-current');
+                    }
+
                     $("#queue-position").html(text);
                     console.log("Queue position: "+position);
                 }).fail(function() {
@@ -52,6 +72,7 @@
             var poemid = "{{session["poem_id"]}}";
             pollForPoem(poemid);
             pollForQueuePosition(poemid);
+
         </script>
     </head>
     <body>
@@ -85,10 +106,10 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('index') }}">Create</a></li>  
+                    <li class="active"><a class="page-navigation-button" href="{{ url_for('index') }}">Create</a></li>  
                 </ul>
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('about') }}">About</a></li>  
+                    <li><a class="page-navigation-button" href="{{ url_for('about') }}">About</a></li>  
                 </ul>
                 <ul class="nav navbar-nav" id="queue-position">
                     {% if (queue_position > 0) %}

@@ -74,3 +74,15 @@ float: left;
 .about-text {
     font-size: 20px;
 }
+
+.qp-current {
+    background-color: #C5EBC6;
+}
+
+.qp-waiting {
+    background-color: #FBFFB3;
+}
+
+.qp-none {
+    background-color: #EBD5C5;
+}
