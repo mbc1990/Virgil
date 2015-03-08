@@ -1,6 +1,7 @@
 
 from app import poem_generator, db
 from models import Poem 
+from config import ENVIRONMENT
 import thread
 
 MAX_CONCURRENT_POEMS = 1
@@ -43,8 +44,12 @@ class Poem_Queue:
             self.running.append(poem)
             print "Starting poem "+str(poem.id)+" with seed words: "+str(poem.seed_words.all())
             pg = poem_generator.Poem_Generator(poem, self)
-            #thread.start_new_thread(pg.start_poem_safe, (poem,))
-            thread.start_new_thread(pg.start_poem, (poem,))
+
+            if ENVIRONMENT == 'Development':
+                thread.start_new_thread(pg.start_poem, (poem,))
+            elif ENVIRONMENT == 'Production':
+                # Throw away unexpected exceptions from the generator in produciton to prevent the queue from breaking 
+                thread.start_new_thread(pg.start_poem_safe, (poem,))
 
     def end_poem(self, poem):
         print "Removing poem "+str(poem.id)+" from queue"
