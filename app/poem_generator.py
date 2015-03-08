@@ -328,8 +328,9 @@ class Poem_Generator:
     def start_poem_safe(self, poem):
         try:
             self.start_poem(poem)
-        except:
+        except Exception as e:
             print "Exception in poem generator, throwing away poem"
+            print e
             self.poem_queue.end_poem(poem)
 
     def start_poem(self, poem):
