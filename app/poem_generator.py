@@ -15,6 +15,7 @@ from random import shuffle
 from stat_parser import Parser
 from models import Poem 
 from app import db
+from config import ENVIRONMENT
 parser = Parser()
 
 class Poem_Generator:
@@ -136,7 +137,10 @@ class Poem_Generator:
         expanded_outline = []
         for keyword in starting_words:
             synsets = wordnet.synsets(keyword)
-            syn_strings = [x.name.split('.')[0] for x in synsets] # get english token from synset
+            if ENVIRONMENT == 'Development':
+                syn_strings = [x.name.split('.')[0] for x in synsets] # get english token from synset
+            elif ENVIRONMENT == 'Production':
+                syn_strings = [x.name().split('.')[0] for x in synsets] # get english token from synset
             expanded_outline += syn_strings
 
         print "Expanded outline: "+str(expanded_outline)
