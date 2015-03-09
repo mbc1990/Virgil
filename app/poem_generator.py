@@ -333,7 +333,7 @@ class Poem_Generator:
             print e
             self.poem_queue.end_poem(poem)
 
-    def start_poem(self, poem):
+    def start_poem(self, poemid):
         print "Starting new poem"
         # This will eventually use WordNet to turn the 1-5 word outline into 10-50 words 
         outline = self.generate_outline()
@@ -354,7 +354,7 @@ class Poem_Generator:
             # Get a fitness score for each poem 
             scored_candidates = []
             counter = 0
-            poem = Poem.query.filter_by(id=poem.id).first()
+            poem = Poem.query.filter_by(id=poemid).first()
             for candidate in candidates:
                 fitness = self.poem_fitness(candidate)
                 counter += 1
@@ -376,7 +376,7 @@ class Poem_Generator:
             # Remove scores
             parents = [p[0] for p in parents] 
 
-            poem = Poem.query.filter_by(id=poem.id).first()
+            poem = Poem.query.filter_by(id=poemid).first()
             # Update database
             poem.text = self.poem_to_html(parents[0]) 
             poem.progress = 100
@@ -410,6 +410,7 @@ class Poem_Generator:
             candidates = children
             generation_counter += 1
 
+        poem = Poem.query.filter_by(id=poemid).first()
         poem.progress = 0
         db.session.add(poem)
         db.session.commit()
@@ -419,6 +420,7 @@ class Poem_Generator:
         scored_count = 0
         for candidate in candidates:
             if scored_count % 5 == 0:
+                poem = Poem.query.filter_by(id=poemid).first()
                 poem.progress = float(scored_count) / float(len(candidates)) * 100
                 db.session.add(poem)
                 db.session.commit()
@@ -433,6 +435,7 @@ class Poem_Generator:
         # Take the fittest candidate and format it for the web app
         best_candidate = scored_candidates[0]
         html_line_breaks = self.poem_to_html(best_candidate[0])
+        poem = Poem.query.filter_by(id=poemid).first()
         poem.text = html_line_breaks 
         poem.current_generation += 1
         db.session.add(poem)

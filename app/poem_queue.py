@@ -46,10 +46,10 @@ class Poem_Queue:
             pg = poem_generator.Poem_Generator(poem, self)
 
             if ENVIRONMENT == 'Development':
-                thread.start_new_thread(pg.start_poem, (poem,))
+                thread.start_new_thread(pg.start_poem, (poem.id,))
             elif ENVIRONMENT == 'Production':
                 # Throw away unexpected exceptions from the generator in produciton to prevent the queue from breaking 
-                thread.start_new_thread(pg.start_poem, (poem,))
+                thread.start_new_thread(pg.start_poem, (poem.id,))
                 #thread.start_new_thread(pg.start_poem_safe, (poem,))
 
     def end_poem(self, poem):
