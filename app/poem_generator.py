@@ -359,6 +359,10 @@ class Poem_Generator:
                 counter += 1
                 if counter % 5 == 0:
                     poem = Poem.query.filter_by(id=poemid).first()
+                    print "Counter: "+str(counter)
+                    print "Poem ID: "+str(poemid)
+                    print "Poem: "+str(poem)
+                    print Poem.query.filter_by(id=poemid).first()
                     poem.progress = float(counter)/float(len(candidates)) * 100
                     db.session.add(poem) # Without this line, the error occurs on the db.session.add() line below
                     db.session.commit()
