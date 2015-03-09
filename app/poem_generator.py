@@ -358,15 +358,18 @@ class Poem_Generator:
                 fitness = self.poem_fitness(candidate)
                 counter += 1
                 if counter % 5 == 0:
-                    poem = Poem.query.filter_by(id=poemid).first()
-                    print "Counter: "+str(counter)
-                    print "Poem ID: "+str(poemid)
-                    print "Poem: "+str(poem)
-                    print Poem.query.filter_by(id=poemid).first()
-                    poem.progress = float(counter)/float(len(candidates)) * 100
-                    db.session.add(poem) # Without this line, the error occurs on the db.session.add() line below
-                    db.session.commit()
-                    print "Poem "+str(poem.id)+": "+str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(self.generations)+' with '+str(len(Poem_Generator.height_memo))+' cached line parse heights'
+                    try:
+                        poem = Poem.query.filter_by(id=poemid).first()
+                        print "Counter: "+str(counter)
+                        print "Poem ID: "+str(poemid)
+                        print "Poem: "+str(poem)
+                        print Poem.query.filter_by(id=poemid).first()
+                        poem.progress = float(counter)/float(len(candidates)) * 100
+                        db.session.add(poem) # Without this line, the error occurs on the db.session.add() line below
+                        db.session.commit()
+                        print "Poem "+str(poem.id)+": "+str(counter)+'/'+str(len(candidates))+' candidates scored in generation '+str(generation_counter)+'/'+str(self.generations)+' with '+str(len(Poem_Generator.height_memo))+' cached line parse heights'
+                    except:
+                        pass
                 scored_candidates.append((candidate, fitness))
                 
             # Sort poems by fitness 
