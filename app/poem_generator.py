@@ -354,11 +354,11 @@ class Poem_Generator:
             # Get a fitness score for each poem 
             scored_candidates = []
             counter = 0
-            poem = Poem.query.filter_by(id=poemid).first()
             for candidate in candidates:
                 fitness = self.poem_fitness(candidate)
                 counter += 1
                 if counter % 5 == 0:
+                    poem = Poem.query.filter_by(id=poemid).first()
                     poem.progress = float(counter)/float(len(candidates)) * 100
                     db.session.add(poem) # Without this line, the error occurs on the db.session.add() line below
                     db.session.commit()
