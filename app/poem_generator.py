@@ -113,6 +113,7 @@ class Poem_Generator:
                 not_allowed.append(word)
         return not_allowed
 
+   
     def __init__(self, poem, poem_queue):
         print "Poem generator init"
 
@@ -350,6 +351,10 @@ class Poem_Generator:
             candidates.append(next_poem)
 
         generation_counter = 1
+        poem = Poem.query.filter_by(id=poemid).first()
+        print "Poem ID: "+str(poemid)
+        print "Poem: "+str(poem)
+        print "DB Poem: "+str(Poem.query.filter_by(id=poemid).first())
         while generation_counter <= self.generations:
             # Get a fitness score for each poem 
             scored_candidates = []
@@ -363,7 +368,7 @@ class Poem_Generator:
                         print "Counter: "+str(counter)
                         print "Poem ID: "+str(poemid)
                         print "Poem: "+str(poem)
-                        print Poem.query.filter_by(id=poemid).first()
+                        print "DB Poem: "+str(Poem.query.filter_by(id=poemid).first())
                         poem.progress = float(counter)/float(len(candidates)) * 100
                         db.session.add(poem) # Without this line, the error occurs on the db.session.add() line below
                         db.session.commit()
