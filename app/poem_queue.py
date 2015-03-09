@@ -49,7 +49,8 @@ class Poem_Queue:
                 thread.start_new_thread(pg.start_poem, (poem,))
             elif ENVIRONMENT == 'Production':
                 # Throw away unexpected exceptions from the generator in produciton to prevent the queue from breaking 
-                thread.start_new_thread(pg.start_poem_safe, (poem,))
+                thread.start_new_thread(pg.start_poem, (poem,))
+                #thread.start_new_thread(pg.start_poem_safe, (poem,))
 
     def end_poem(self, poem):
         print "Removing poem "+str(poem.id)+" from queue"
