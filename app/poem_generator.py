@@ -332,7 +332,7 @@ class Poem_Generator:
         except Exception as e:
             print "Exception in poem generator, throwing away poem"
             print e
-            self.poem_queue.end_poem(poem)
+            self.poem_queue.end_poem(poem.id)
 
     def start_poem(self, poemid):
         print "Starting new poem"
@@ -458,7 +458,7 @@ class Poem_Generator:
         db.session.commit()
 
         # Tell the queue that a poem is complete
-        self.poem_queue.end_poem(poem)
+        self.poem_queue.end_poem(poem.id)
 
         # Save parse height cache
         self.dump_parse_height_cache()

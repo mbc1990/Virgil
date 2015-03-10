@@ -96,8 +96,8 @@ def session_poem():
 
 @app.route('/queue_position', methods=['GET', 'POST'])
 def queue_position():
-    poem = Poem.query.filter_by(id=session['poem_id']).first()
-    position = app.poem_queue.get_position(poem)
+    #poem = Poem.query.filter_by(id=session['poem_id']).first()
+    position = app.poem_queue.get_position(session['poem_id'])
     return str(position)
 
 #@app.route('/favorites')

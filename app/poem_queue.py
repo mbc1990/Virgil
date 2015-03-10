@@ -16,32 +16,30 @@ class Poem_Queue:
         self.running = []
 
 
-    def get_position(self, poem):
+    def get_position(self, poemid):
         for p in self.running:
-            if p.id == poem.id:
+            if p == poemid:
                 return 0
         pos = 1
-        for queue_poem in self.queue:
-            if poem.id == queue_poem.id:
+        for queue_poem_id in self.queue:
+            if poemid == queue_poem_id:
                 return pos
             pos += 1
         return -1 
 
     def add_poem(self, poem):
         print "adding poem "+str(poem.id)+" with seed words: "+str(poem.seed_words.all())
-        db.session.add(poem)
-        db.session.commit()
-        self.queue.append(poem)
+        self.queue.append(poem.id)
         self.advance()
 
     def advance(self):
         while self.running_count < MAX_CONCURRENT_POEMS and len(self.queue) > 0:
-            poem = self.queue.pop(0)
-            print "poem: "+str(poem)
-            poem = Poem.query.filter_by(id=poem.id).first()
-            print "poem after: "+str(poem)
+            poemid = self.queue.pop(0)
+            print "poemid: "+str(poemid)
+            poem = Poem.query.filter_by(id=poemid).first()
+            print "poem about to be advanced:: "+str(poem)
             self.running_count += 1
-            self.running.append(poem)
+            self.running.append(poemid)
             print "Starting poem "+str(poem.id)+" with seed words: "+str(poem.seed_words.all())
             pg = poem_generator.Poem_Generator(poem, self)
 
@@ -52,10 +50,10 @@ class Poem_Queue:
                 thread.start_new_thread(pg.start_poem, (poem.id,))
                 #thread.start_new_thread(pg.start_poem_safe, (poem,))
 
-    def end_poem(self, poem):
-        print "Removing poem "+str(poem.id)+" from queue"
+    def end_poem(self, poemid):
+        print "Removing poem "+str(poemid)+" from queue"
         self.running_count -= 1
         print self.running
-        self.running = [s for s in self.running if s.id != poem.id] 
+        self.running = [s for s in self.running if s != poemid] 
         print self.running
         self.advance()
