@@ -367,7 +367,7 @@ class Poem_Generator:
                         poem = Poem.query.filter_by(id=poemid).first()
                         poems = Poem.query.all();
                         for p in poems:
-                            print p.id + " " + p.seed_words
+                            print "query all poem: "+str(p.id) 
 
                         print "Counter: "+str(counter)
                         print "Poem ID: "+str(poemid)
