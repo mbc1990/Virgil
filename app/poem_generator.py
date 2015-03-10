@@ -365,6 +365,10 @@ class Poem_Generator:
                 if counter % 5 == 0:
                     try:
                         poem = Poem.query.filter_by(id=poemid).first()
+                        poems = Poem.query.all();
+                        for p in poems:
+                            print p.id + " " + p.seed_words
+
                         print "Counter: "+str(counter)
                         print "Poem ID: "+str(poemid)
                         print "Poem: "+str(poem)
