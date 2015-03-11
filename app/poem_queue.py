@@ -27,9 +27,9 @@ class Poem_Queue:
             pos += 1
         return -1 
 
-    def add_poem(self, poem):
-        print "adding poem "+str(poem.id)+" with seed words: "+str(poem.seed_words.all())
-        self.queue.append(poem.id)
+    def add_poem(self, poemid):
+        print "adding poem "+str(poemid) #+" with seed words: "+str(poem.seed_words.all())
+        self.queue.append(poemid)
         self.advance()
 
     def advance(self):

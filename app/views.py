@@ -23,7 +23,7 @@ def index():
             progress=0)
 
         db.session.add(poem) 
-        db.session.commit()
+        #db.session.commit()
 
         # Add all the input seedwords 
         seed_words = form.seed_words.data.replace(', ',',')
@@ -31,10 +31,11 @@ def index():
         for sw  in seed_word_split:
             seed_word = Seed_Word(word=sw, poem=poem)
             db.session.add(seed_word)
-            db.session.commit()
+
+        db.session.commit()
 
         # Add the poem to the queue
-        app.poem_queue.add_poem(poem)
+        app.poem_queue.add_poem(poem.id)
 
         # Keep track of poem id 
         session['poem_id'] = poem.id 
