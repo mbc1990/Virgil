@@ -37,12 +37,13 @@ class Poem_Queue:
             poemid = self.queue.pop(0)
             print "poemid: "+str(poemid)
             poem = Poem.query.filter_by(id=poemid).first()
-            print "poem about to be advanced:: "+str(poem)
+            print "poem about to be advanced: "+str(poem)
             self.running_count += 1
             self.running.append(poemid)
             print "Starting poem "+str(poem.id)+" with seed words: "+str(poem.seed_words.all())
             pg = poem_generator.Poem_Generator(poem, self)
 
+            print "DB Poem in advance, right before start_poem: "+str(Poem.query.filter_by(id=poemid).first())
             if ENVIRONMENT == 'Development':
                 thread.start_new_thread(pg.start_poem, (poem.id,))
             elif ENVIRONMENT == 'Production':
