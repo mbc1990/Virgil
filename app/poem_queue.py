@@ -41,7 +41,8 @@ class Poem_Queue:
             self.running_count += 1
             self.running.append(poemid)
             print "Starting poem "+str(poem.id)+" with seed words: "+str(poem.seed_words.all())
-            pg = poem_generator.Poem_Generator(poem, self)
+            seed_words = ["cat"]
+            pg = poem_generator.Poem_Generator(self, poem.generations, poem.breeding_fraction, poem.mutation_probability, poem.lines, poem.starting_population_size, poem.phonetic_similarity_weight, seed_words)
 
             print "DB Poem in advance, right before start_poem: "+str(Poem.query.filter_by(id=poemid).first())
             if ENVIRONMENT == 'Development':

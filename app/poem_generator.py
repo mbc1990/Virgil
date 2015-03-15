@@ -114,16 +114,18 @@ class Poem_Generator:
         return not_allowed
 
    
-    def __init__(self, poem, poem_queue):
+    #def __init__(self, poem, poem_queue):
+    def __init__(self, poem_queue, generations, breeding_fraction, mutation_probability, lines, starting_population_size, phonetic_similarity_weight, seed_words):
         print "Poem generator init"
 
-        self.generations = poem.generations # Number of selection-breeding processes
-        self.breeding_fraction = poem.breeding_fraction # .35 # Top fraction of candidates selected to breed
-        self.mutation_prob = poem.mutation_probability #.05 # Probability that a child will be mutated
-        self.poem_length = poem.lines #6 # Number of lines in a poem
-        self.starting_population_size = poem.starting_population_size #50 # Number of poems the algorithm begins with 
-        self.phonetic_similarity_weight = poem.phonetic_similarity_weight
-        self.seed_words = [w.word for w in poem.seed_words.all()] #['cat', 'winter'] # Input "idea"
+        self.generations = generations # Number of selection-breeding processes
+        self.breeding_fraction = breeding_fraction # .35 # Top fraction of candidates selected to breed
+        self.mutation_prob = mutation_probability #.05 # Probability that a child will be mutated
+        self.poem_length = lines #6 # Number of lines in a poem
+        self.starting_population_size = starting_population_size #50 # Number of poems the algorithm begins with 
+        self.phonetic_similarity_weight = phonetic_similarity_weight
+        #self.seed_words = [w.word for w in poem.seed_words.all()] #['cat', 'winter'] # Input "idea"
+        self.seed_words = seed_words
         print "Generator initialized with: "+str(self.seed_words)
         self.poem_queue = poem_queue 
         
