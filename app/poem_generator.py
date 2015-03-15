@@ -337,8 +337,8 @@ class Poem_Generator:
             self.poem_queue.end_poem(poem.id)
 
     def start_poem(self, poemid):
-        print "DB Poem at top of start_poem: "+str(Poem.query.filter_by(id=poemid).first())
         print "start_poem called with"+str(poemid)
+        print "DB Poem at top of start_poem: "+str(Poem.query.filter_by(id=poemid).first())
         # This will eventually use WordNet to turn the 1-5 word outline into 10-50 words 
         outline = self.generate_outline()
         print "outline: "+str(outline)

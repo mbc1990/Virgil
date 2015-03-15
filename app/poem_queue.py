@@ -46,10 +46,10 @@ class Poem_Queue:
 
             print "DB Poem in advance, right before start_poem: "+str(Poem.query.filter_by(id=poemid).first())
             if ENVIRONMENT == 'Development':
-                thread.start_new_thread(pg.start_poem, (poem.id,))
+                thread.start_new_thread(pg.start_poem, (poemid,))
             elif ENVIRONMENT == 'Production':
                 # Throw away unexpected exceptions from the generator in produciton to prevent the queue from breaking 
-                thread.start_new_thread(pg.start_poem, (poem.id,))
+                thread.start_new_thread(pg.start_poem, (poemid,))
                 #thread.start_new_thread(pg.start_poem_safe, (poem,))
 
     def end_poem(self, poemid):
